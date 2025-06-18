@@ -5,8 +5,8 @@
 
 Copyright by 2025 KROS of KSA
 
-Website : https://talosftc.com/
-Github : https://github.com/TALOS-25309/FTC2024-2025_RobotSourceCode_Renewal        
-Official Instagram : https://www.instagram.com/talos.ftc_ksa/
+Website : https://talosftc.com/    
+Github : https://github.com/TALOS-25309  
+Official Instagram : https://www.instagram.com/talosftckorea/     
 
 These source codes are based on FTC official robot source codes and libraries.
