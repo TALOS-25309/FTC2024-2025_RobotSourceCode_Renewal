@@ -54,13 +54,25 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         lastEncPositions = lastTrackingEncPositions;
         lastEncVels = lastTrackingEncVels;
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, DriveConstants.ODOMETRY_NAME_LEFT));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, DriveConstants.ODOMETRY_NAME_RIGHT));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, DriveConstants.ODOMETRY_NAME_FRONT));
 
-        leftEncoder.setDirection(Encoder.Direction.FORWARD);
-        rightEncoder.setDirection(Encoder.Direction.REVERSE);
-        frontEncoder.setDirection(Encoder.Direction.FORWARD);
+        if (DriveConstants.ODOMETRY_REVERSE_LEFT) {
+            leftEncoder.setDirection(Encoder.Direction.REVERSE);
+        } else {
+            leftEncoder.setDirection(Encoder.Direction.FORWARD);
+        }
+        if (DriveConstants.ODOMETRY_REVERSE_RIGHT) {
+            rightEncoder.setDirection(Encoder.Direction.REVERSE);
+        } else {
+            rightEncoder.setDirection(Encoder.Direction.FORWARD);
+        }
+        if (DriveConstants.ODOMETRY_REVERSE_FRONT) {
+            frontEncoder.setDirection(Encoder.Direction.REVERSE);
+        } else {
+            frontEncoder.setDirection(Encoder.Direction.FORWARD);
+        }
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
     }

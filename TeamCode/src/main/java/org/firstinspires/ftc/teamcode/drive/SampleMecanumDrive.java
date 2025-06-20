@@ -45,6 +45,14 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_VEL;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MOTOR_VELO_PID;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TRACK_WIDTH;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_LEFT_FRONT;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_LEFT_REAR;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_RIGHT_FRONT;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_RIGHT_REAR;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_REVERSE_LEFT_FRONT;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_REVERSE_LEFT_REAR;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_REVERSE_RIGHT_FRONT;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_REVERSE_RIGHT_REAR;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.encoderTicksToInches;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kStatic;
@@ -94,13 +102,31 @@ public class SampleMecanumDrive extends MecanumDrive {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
-        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftFront = hardwareMap.get(DcMotorEx.class, WHEEL_NAME_LEFT_FRONT);
+        leftRear = hardwareMap.get(DcMotorEx.class, WHEEL_NAME_LEFT_REAR);
+        rightRear = hardwareMap.get(DcMotorEx.class, WHEEL_NAME_RIGHT_REAR);
+        rightFront = hardwareMap.get(DcMotorEx.class,WHEEL_NAME_RIGHT_FRONT);
 
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (WHEEL_REVERSE_LEFT_FRONT) {
+            leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else {
+            leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+        if (WHEEL_REVERSE_LEFT_REAR) {
+            leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else {
+            leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+        if (WHEEL_REVERSE_RIGHT_REAR) {
+            rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else {
+            rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+        if (WHEEL_REVERSE_RIGHT_FRONT) {
+            rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else {
+            rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -119,8 +145,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
-
-        // TODO: reverse any motors using DcMotor.setDirection()
 
         List<Integer> lastTrackingEncPositions = new ArrayList<>();
         List<Integer> lastTrackingEncVels = new ArrayList<>();

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.part.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,61 +8,49 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.part.Part;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class Drive implements Part {
-    private Telemetry telemetry;
+    Telemetry telemetry;
+    Commands commandProcessor;
 
-    private SampleMecanumDrive drive;
-    private Pose2d robotPose;
+    SampleMecanumDrive sampleMecanumDrive;
+    Pose2d robotPose;
 
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
+        Constants.SyncDriveConstantsWithRoadRunner();
         this.telemetry = telemetry;
+        this.commandProcessor = new Commands(this);
+
         // Initialize Drive
-        this.drive = new SampleMecanumDrive(hardwareMap);
+        this.sampleMecanumDrive = new SampleMecanumDrive(hardwareMap);
 
-        this.drive.setPoseEstimate(DriveConstants.INITIAL_POSITION);
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        this.sampleMecanumDrive.setPoseEstimate(Constants.INITIAL_POSITION);
+        sampleMecanumDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void update() {
-        this.drive.update();
+        this.sampleMecanumDrive.update();
 
         // Get Current Pose
-        this.robotPose = this.drive.getPoseEstimate();
+        this.robotPose = this.sampleMecanumDrive.getPoseEstimate();
         telemetry.addData("x", robotPose.getX());
         telemetry.addData("y", robotPose.getY());
         telemetry.addData("heading", robotPose.getHeading());
     }
 
     public void stop() {
-        this.drive.breakFollowing();
+        this.sampleMecanumDrive.breakFollowing();
     }
 
     public TrajectoryBuilder trajectoryBuilder() {
-        return this.drive.trajectoryBuilder(this.robotPose);
+        return this.sampleMecanumDrive.trajectoryBuilder(this.robotPose);
     }
 
     public boolean isBusy() {
-        return this.drive.isBusy();
+        return this.sampleMecanumDrive.isBusy();
     }
 
-    public void cmdDrive(double x, double y, double omega) {
-        drive.setWeightedDrivePower(
-                new Pose2d(
-                        y * DriveConstants.directionSign,
-                        -x * DriveConstants.directionSign,
-                        -omega
-                )
-        );
-    }
-
-    public void cmdFollowTrajectory(TrajectorySequence trajectory) {
-        this.drive.followTrajectorySequence(trajectory);
-    }
-
-    public void cmdChangeDirection() {
-        DriveConstants.directionSign *= -1.0;
+    public Commands command() {
+        return this.commandProcessor;
     }
 }

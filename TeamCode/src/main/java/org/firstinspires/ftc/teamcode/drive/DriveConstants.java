@@ -25,6 +25,30 @@ public class DriveConstants {
     public static final double MAX_RPM = 435;
 
     /*
+     * THIS PART IS CUSTOM PART (NOT THE ROADRUNNER STANDARD SETTING).
+     * Set the name of wheel motors here.
+     * The names should match the names in your robot configuration.
+     * And the Wheel Direction Data.
+     */
+    public static String WHEEL_NAME_LEFT_FRONT = "leftFront";
+    public static String WHEEL_NAME_LEFT_REAR = "leftBack";
+    public static String WHEEL_NAME_RIGHT_FRONT = "rightFront";
+    public static String WHEEL_NAME_RIGHT_REAR = "rightBack";
+
+    public static Boolean WHEEL_REVERSE_LEFT_FRONT = false;
+    public static Boolean WHEEL_REVERSE_LEFT_REAR = true;
+    public static Boolean WHEEL_REVERSE_RIGHT_FRONT = true;
+    public static Boolean WHEEL_REVERSE_RIGHT_REAR = false;
+
+    public static String ODOMETRY_NAME_LEFT = "leftOdo";
+    public static String ODOMETRY_NAME_RIGHT = "rightOdo";
+    public static String ODOMETRY_NAME_FRONT = "frontOdo";
+
+    public static Boolean ODOMETRY_REVERSE_LEFT = false;
+    public static Boolean ODOMETRY_REVERSE_RIGHT = true;
+    public static Boolean ODOMETRY_REVERSE_FRONT = false;
+
+    /*
      * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
      * Set this flag to false if drive encoders are not present and an alternative localization
      * method is in use (e.g., tracking wheels).
