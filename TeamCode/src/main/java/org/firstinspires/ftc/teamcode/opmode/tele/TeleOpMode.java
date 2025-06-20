@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 
-@TeleOp(name = "TeleOp")
+@TeleOp(group = "telemetry")
 public class TeleOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;

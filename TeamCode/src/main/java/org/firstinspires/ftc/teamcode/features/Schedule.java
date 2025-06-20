@@ -7,14 +7,20 @@ import java.util.PriorityQueue;
 class Task implements Comparable<Task> {
     private final Runnable task;
     private final long delay;
+    private final boolean async;
 
-    public Task(Runnable task, long delay) {
+    public Task(Runnable task, long delay, boolean async) {
         this.task = task;
         this.delay = delay;
+        this.async = async;
     }
 
     public void run() {
-        task.run();
+        if (async) {
+            new Thread(task).start();
+        } else {
+            task.run();
+        }
     }
 
     public boolean isReady(long currentTime) {
@@ -36,7 +42,11 @@ public class Schedule {
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();
 
     public static void addTask(@NonNull Runnable task, double delay) {
-        tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9)));
+        tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9), false));
+    }
+
+    public static void addTaskAsync(@NonNull Runnable task, double delay) {
+        tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9), true));
     }
 
     public static void update() {
