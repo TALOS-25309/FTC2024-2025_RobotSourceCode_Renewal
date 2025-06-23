@@ -9,7 +9,7 @@ public class TelemetrySystem {
     private static Telemetry telemetry;
     private static boolean isInitialized = false;
     private static Map<String, Boolean> enabledClasses = new HashMap<>();
-    private static boolean isDebugMode = false;
+    private static boolean isDebugMode = true;
 
     private static void checkInitialization() {
         if (!isInitialized) {
@@ -30,14 +30,16 @@ public class TelemetrySystem {
 
     public static void addClassData(String className, String caption, Object value) {
         checkInitialization();
-        if (enabledClasses.containsKey(className) && Boolean.TRUE.equals(enabledClasses.get(className))) {
+        if (!enabledClasses.containsKey(className) || Boolean.TRUE.equals(enabledClasses.get(className))) {
             telemetry.addData("[" + className + "] " + caption, value);
         }
     }
 
     public static void addDebugData(String caption, Object value) {
-        checkInitialization();
-        telemetry.addData("[DEBUG] " + caption, value);
+        if (isDebugMode) {
+            checkInitialization();
+            telemetry.addData("[DEBUG] " + caption, value);
+        }
     }
 
     public static void enableClass(String className) {
@@ -57,8 +59,6 @@ public class TelemetrySystem {
 
     public static void update() {
         checkInitialization();
-        if (isDebugMode) {
-            telemetry.update();
-        }
+        telemetry.update();
     }
 }

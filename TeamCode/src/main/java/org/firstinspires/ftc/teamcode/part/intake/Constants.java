@@ -20,7 +20,7 @@ class Constants {
     static final double ARM_LENGTH = 20.0; // Length of the arm in cm
     static final double TURRET_RANGE_IN_DEGREE = 180.0; // Range of the turret in degrees
 
-    static final double TURRET_RANGE = TURRET_RANGE_IN_DEGREE / 360.0; // DO NOT CHANGE
+    static final double TURRET_RANGE = Math.toRadians(TURRET_RANGE_IN_DEGREE); // DO NOT CHANGE
 
     // Linear slide system values
     static double LINEAR_SLIDE_MAX_POWER = 0.5;
