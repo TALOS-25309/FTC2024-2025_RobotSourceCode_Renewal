@@ -5,20 +5,18 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Drive implements Part {
-    Telemetry telemetry;
     Commands commandProcessor;
 
     SampleMecanumDrive sampleMecanumDrive;
     Pose2d robotPose;
 
-    public void init(HardwareMap hardwareMap, Telemetry telemetry) {
+    public void init(HardwareMap hardwareMap) {
         Constants.SyncDriveConstantsWithRoadRunner();
-        this.telemetry = telemetry;
         this.commandProcessor = new Commands(this);
 
         // Initialize Drive
@@ -33,9 +31,9 @@ public class Drive implements Part {
 
         // Get Current Pose
         this.robotPose = this.sampleMecanumDrive.getPoseEstimate();
-        telemetry.addData("x", robotPose.getX());
-        telemetry.addData("y", robotPose.getY());
-        telemetry.addData("heading", robotPose.getHeading());
+        TelemetrySystem.addClassData("Drive","robot x", robotPose.getX());
+        TelemetrySystem.addClassData("Drive","[drive] robot y", robotPose.getY());
+        TelemetrySystem.addClassData("Drive","[drive] robot heading", robotPose.getHeading());
     }
 
     public void stop() {

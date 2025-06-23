@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.features.PID;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 
 @Config
 @TeleOp(group = "test")
@@ -36,6 +37,7 @@ public class PIDTest extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
+        TelemetrySystem.init(telemetry);
         pid = new PID(P, I, D);
         motor = hardwareMap.get(DcMotorEx.class, "motor");
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -57,10 +59,10 @@ public class PIDTest extends OpMode {
         double power = pid.update(error, -MINMAX_LIMIT, MINMAX_LIMIT);
         motor.setPower(power);
 
-        telemetry.addData("Target Position", TARGET_POSITION);
-        telemetry.addData("Current Position", currentPosition);
-        telemetry.addData("Error", error);
-        telemetry.addData("Integral", pid.getIntegral());
+        TelemetrySystem.addClassData("PIDTest","Target Position", TARGET_POSITION);
+        TelemetrySystem.addClassData("PIDTest","Current Position", currentPosition);
+        TelemetrySystem.addClassData("PIDTest","Error", error);
+        TelemetrySystem.addClassData("PIDTest","Integral", pid.getIntegral());
 
         if (previousTargetPosition != TARGET_POSITION) {
             pid.resetIntegral();
@@ -69,7 +71,7 @@ public class PIDTest extends OpMode {
 
         Schedule.update();
         SmartServo.updateAll();
-        telemetry.update();
+        TelemetrySystem.update();
     }
 
     @Override

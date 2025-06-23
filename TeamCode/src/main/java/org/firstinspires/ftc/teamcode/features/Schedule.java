@@ -40,13 +40,22 @@ class Task implements Comparable<Task> {
 public class Schedule {
     private Schedule() {}
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();
+    public static final double RUN_INSTANTLY = 0.0;
 
     public static void addTask(@NonNull Runnable task, double delay) {
-        tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9), false));
+        if (delay <= RUN_INSTANTLY) {
+            task.run();
+        } else {
+            tasks.add(new Task(task, System.nanoTime() + (long) (delay * 1e9), false));
+        }
     }
 
     public static void addTaskAsync(@NonNull Runnable task, double delay) {
-        tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9), true));
+        if (delay <= RUN_INSTANTLY) {
+            new Thread(task).start();
+        } else {
+            tasks.add(new Task(task, System.nanoTime() + (long)(delay * 1e9), true));
+        }
     }
 
     public static void update() {

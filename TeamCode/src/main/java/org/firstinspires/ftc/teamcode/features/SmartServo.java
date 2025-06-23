@@ -13,8 +13,8 @@ public class SmartServo {
     private long startTime;
     private long duration;
 
-    private String name;
-    private static Vector<SmartServo> smartServos = new Vector<SmartServo>();
+    private final String name;
+    private static final Vector<SmartServo> smartServos = new Vector<SmartServo>();
 
     public SmartServo(Servo servo, String name) {
         this.servo = servo;

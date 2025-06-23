@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.features.SmartGamepad;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 
 @Config
@@ -22,9 +23,10 @@ public class DriveTest extends OpMode {
 
     @Override
     public void init() {
-        drivePart = new Drive();
-        drivePart.init(hardwareMap, telemetry);
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
+        TelemetrySystem.init(telemetry);
+        drivePart = new Drive();
+        drivePart.init(hardwareMap);
         gamepad = new SmartGamepad(gamepad1);
     }
 

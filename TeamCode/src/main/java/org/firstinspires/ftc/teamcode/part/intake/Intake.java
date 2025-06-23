@@ -1,23 +1,67 @@
 package org.firstinspires.ftc.teamcode.part.intake;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.features.SmartMotor;
+import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Intake implements Part {
-    Telemetry telemetry;
     Commands commandProcessor;
 
-    public void init(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.telemetry = telemetry;
+    SmartServo clawServo;
+    SmartServo wristOrientationServo;
+    SmartServo wristUpDownServo;
+    SmartServo armUpDownServo;
+    SmartServo turretServo;
+
+    SmartMotor linearSlideMotor;
+
+    public void init(HardwareMap hardwareMap) {
         this.commandProcessor = new Commands(this);
+
+        // Initialize hardware components
+        clawServo = new SmartServo(hardwareMap.get(Servo.class, Constants.CLAW_SERVO_NAME), Constants.CLAW_SERVO_NAME);
+        wristOrientationServo = new SmartServo(hardwareMap.get(Servo.class, Constants.WRIST_ORIENTATION_SERVO_NAME), Constants.WRIST_ORIENTATION_SERVO_NAME);
+        wristUpDownServo = new SmartServo(hardwareMap.get(Servo.class, Constants.WRIST_UP_DOWN_SERVO_NAME), Constants.WRIST_UP_DOWN_SERVO_NAME);
+        armUpDownServo = new SmartServo(hardwareMap.get(Servo.class, Constants.ARM_UP_DOWN_SERVO_NAME), Constants.ARM_UP_DOWN_SERVO_NAME);
+        turretServo = new SmartServo(hardwareMap.get(Servo.class, Constants.ARM_ROTATION_SERVO_NAME), Constants.ARM_ROTATION_SERVO_NAME);
+        linearSlideMotor = new SmartMotor(
+                hardwareMap.get(DcMotor.class, Constants.LINEAR_SLIDE_MOTOR_NAME),
+                hardwareMap.get(DcMotor.class, Constants.LINEAR_SLIDE_ENCODER_NAME),
+                Constants.LINEAR_SLIDE_MOTOR_NAME
+        );
+
+        // Set initial positions
+        clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+        wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+        wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+        armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
+        turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+
+        // Set motor properties
+        linearSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        linearSlideMotor.setMotorDirection(DcMotor.Direction.FORWARD);
+        linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
+        linearSlideMotor.resetEncoder();
+        linearSlideMotor.setPID(Constants.LINEAR_SLIDE_P, Constants.LINEAR_SLIDE_I, Constants.LINEAR_SLIDE_D);
+        linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
     }
 
     public void update() {
-        // Update intake state here
+        if (Constants.CAN_LINEAR_SLIDE_SYSTEM_BE_MANIPULATED) {
+            linearSlideMotor.setPID(Constants.LINEAR_SLIDE_P, Constants.LINEAR_SLIDE_I, Constants.LINEAR_SLIDE_D);
+            linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
+        }
     }
 
     public void stop() {
-        // Stop intake operations here
+        // Do nothing for now
+    }
+
+    public Commands command() {
+        return this.commandProcessor;
     }
 }

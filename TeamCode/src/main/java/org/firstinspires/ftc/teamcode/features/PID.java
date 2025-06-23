@@ -21,7 +21,7 @@ public class PID {
     double loopTime = 0.0;
     double lastDerivative = 0.0;
 
-    public static double LOW_PASS_FILTER = 0.01;
+    public static double LOW_PASS_FILTER = 0.01; // The value to manipulate
 
     public void resetIntegral() {
         integral = 0;
