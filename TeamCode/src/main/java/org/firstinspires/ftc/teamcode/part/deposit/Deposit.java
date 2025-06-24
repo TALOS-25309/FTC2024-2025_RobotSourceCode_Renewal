@@ -13,11 +13,11 @@ public class Deposit implements Part {
     private Commands commandProcessor;
 
     SmartServo clawServo;
-    SmartServo armLeftServo;
-    SmartServo armRightServo;
+    SmartServo armMainServo; // Left
+    SmartServo armAuxServo; // Right
 
-    SmartMotor linearSlideMainMotor;
-    SmartMotor linearSlideAuxMotor;
+    SmartMotor linearSlideMainMotor; // Inner
+    SmartMotor linearSlideAuxMotor; // Outer
 
     @Override
     public void init(HardwareMap hardwareMap) {
@@ -28,11 +28,11 @@ public class Deposit implements Part {
                 hardwareMap.get(Servo.class, Constants.CLAW_SERVO_NAME),
                 Constants.CLAW_SERVO_NAME
         );
-        armLeftServo = new SmartServo(
+        armMainServo = new SmartServo(
                 hardwareMap.get(Servo.class, Constants.ARM_SERVO_LEFT_NAME),
                 Constants.ARM_SERVO_LEFT_NAME
         );
-        armRightServo = new SmartServo(
+        armAuxServo = new SmartServo(
                 hardwareMap.get(Servo.class, Constants.ARM_SERVO_RIGHT_NAME),
                 Constants.ARM_SERVO_RIGHT_NAME
         );
@@ -47,10 +47,14 @@ public class Deposit implements Part {
                 Constants.LINEAR_SLIDE_AUX_MOTOR_NAME
         );
 
-        // Set initial positions
+        // Set initial positions and properties for servos
+        clawServo.setDirection(Servo.Direction.FORWARD);
         clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
-        armLeftServo.setPosition(Constants.ARM_READY_POSITION);
-        armRightServo.setPosition(Constants.ARM_READY_POSITION);
+
+        armMainServo.setDirection(Servo.Direction.FORWARD);
+        armAuxServo.setDirection(Servo.Direction.REVERSE);
+        armAuxServo.synchronizeWith(Constants.ARM_SERVO_LEFT_NAME, Constants.ARM_POSITION_DIFFERENCE);
+        armMainServo.setPosition(Constants.ARM_READY_POSITION);
 
         // Set motor properties
         linearSlideMainMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);

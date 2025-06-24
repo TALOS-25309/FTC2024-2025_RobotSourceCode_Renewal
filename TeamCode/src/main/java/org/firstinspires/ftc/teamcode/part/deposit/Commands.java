@@ -23,8 +23,7 @@ public class Commands {
 
     public void ready() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_READY_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_READY_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -46,8 +45,7 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_TRANSFER_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_TRANSFER_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_TRANSFER_POSITION);
         }, Constants.TRANSFER_DELAY_FOR_GOTO_TRANSFER_POSITION);
 
         Schedule.addTask(() -> {
@@ -55,16 +53,14 @@ public class Commands {
         }, Constants.TRANSFER_DELAY_FOR_CLOSE_CLAW);
 
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_READY_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_READY_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
             deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
         }, Constants.TRANSFER_DELAY_FOR_GOTO_READY_POSITION);
     }
 
     public void poseForSpecimenPickup() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_PICKUP_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_PICKUP_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_PICKUP_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -82,8 +78,7 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
         }, Constants.PICKUP_DELAY_FOR_GOTO_READY_POSITION);
 
         Schedule.addTask(() -> {
@@ -93,8 +88,7 @@ public class Commands {
 
     public void poseForLowBasketScoring() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -104,8 +98,7 @@ public class Commands {
 
     public void poseForHighBasketScoring() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -119,8 +112,7 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_READY_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_READY_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
         }, Constants.SCORING_BASKET_DELAY_FOR_GOTO_READY_POSITION);
 
         Schedule.addTask(() -> {
@@ -130,8 +122,7 @@ public class Commands {
 
     public void poseForLowSpecimenScoringForward() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -141,8 +132,7 @@ public class Commands {
 
     public void poseForLowSpecimenScoringBackward() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -152,8 +142,7 @@ public class Commands {
 
     public void poseForHighSpecimenScoringForward() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -163,8 +152,7 @@ public class Commands {
 
     public void poseForHighSpecimenScoringBackward() {
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -178,8 +166,7 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.armLeftServo.setPosition(Constants.ARM_READY_POSITION);
-            deposit.armRightServo.setPosition(Constants.ARM_READY_POSITION);
+            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
         }, Constants.SCORING_SPECIMEN_DELAY_FOR_GOTO_READY_POSITION);
 
         Schedule.addTask(() -> {
