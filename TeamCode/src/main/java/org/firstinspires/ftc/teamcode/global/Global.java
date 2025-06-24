@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class Global {
+    public enum Alliance {RED, BLUE}
+    public static Alliance ALLIANCE = Alliance.RED;
+
     public enum RobotState { NONE }
     public static RobotState ROBOT_STATE = RobotState.NONE;
 

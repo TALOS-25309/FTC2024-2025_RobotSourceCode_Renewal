@@ -15,6 +15,7 @@ public class Drive implements Part {
     SampleMecanumDrive sampleMecanumDrive;
     Pose2d robotPose;
 
+    @Override
     public void init(HardwareMap hardwareMap) {
         Constants.SyncDriveConstantsWithRoadRunner();
         this.commandProcessor = new Commands(this);
@@ -26,6 +27,7 @@ public class Drive implements Part {
         sampleMecanumDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    @Override
     public void update() {
         this.sampleMecanumDrive.update();
 
@@ -36,6 +38,7 @@ public class Drive implements Part {
         TelemetrySystem.addClassData("Drive","[drive] robot heading", robotPose.getHeading());
     }
 
+    @Override
     public void stop() {
         this.sampleMecanumDrive.breakFollowing();
     }

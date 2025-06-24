@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.part.Part;
+import org.firstinspires.ftc.teamcode.vision.Vision;
 
 public class Intake implements Part {
     Commands commandProcessor;
@@ -19,15 +20,34 @@ public class Intake implements Part {
 
     SmartMotor linearSlideMotor;
 
+    Vision vision;
+
+    @Override
     public void init(HardwareMap hardwareMap) {
         this.commandProcessor = new Commands(this);
 
         // Initialize hardware components
-        clawServo = new SmartServo(hardwareMap.get(Servo.class, Constants.CLAW_SERVO_NAME), Constants.CLAW_SERVO_NAME);
-        wristOrientationServo = new SmartServo(hardwareMap.get(Servo.class, Constants.WRIST_ORIENTATION_SERVO_NAME), Constants.WRIST_ORIENTATION_SERVO_NAME);
-        wristUpDownServo = new SmartServo(hardwareMap.get(Servo.class, Constants.WRIST_UP_DOWN_SERVO_NAME), Constants.WRIST_UP_DOWN_SERVO_NAME);
-        armUpDownServo = new SmartServo(hardwareMap.get(Servo.class, Constants.ARM_UP_DOWN_SERVO_NAME), Constants.ARM_UP_DOWN_SERVO_NAME);
-        turretServo = new SmartServo(hardwareMap.get(Servo.class, Constants.ARM_ROTATION_SERVO_NAME), Constants.ARM_ROTATION_SERVO_NAME);
+        vision = new Vision(hardwareMap);
+        clawServo = new SmartServo(
+                hardwareMap.get(Servo.class, Constants.CLAW_SERVO_NAME),
+                Constants.CLAW_SERVO_NAME
+        );
+        wristOrientationServo = new SmartServo(
+                hardwareMap.get(Servo.class, Constants.WRIST_ORIENTATION_SERVO_NAME),
+                Constants.WRIST_ORIENTATION_SERVO_NAME
+        );
+        wristUpDownServo = new SmartServo(
+                hardwareMap.get(Servo.class, Constants.WRIST_UP_DOWN_SERVO_NAME),
+                Constants.WRIST_UP_DOWN_SERVO_NAME
+        );
+        armUpDownServo = new SmartServo(
+                hardwareMap.get(Servo.class, Constants.ARM_UP_DOWN_SERVO_NAME),
+                Constants.ARM_UP_DOWN_SERVO_NAME
+        );
+        turretServo = new SmartServo(
+                hardwareMap.get(Servo.class, Constants.ARM_ROTATION_SERVO_NAME),
+                Constants.ARM_ROTATION_SERVO_NAME
+        );
         linearSlideMotor = new SmartMotor(
                 hardwareMap.get(DcMotor.class, Constants.LINEAR_SLIDE_MOTOR_NAME),
                 hardwareMap.get(DcMotor.class, Constants.LINEAR_SLIDE_ENCODER_NAME),
@@ -46,19 +66,30 @@ public class Intake implements Part {
         linearSlideMotor.setMotorDirection(DcMotor.Direction.FORWARD);
         linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
         linearSlideMotor.resetEncoder();
-        linearSlideMotor.setPID(Constants.LINEAR_SLIDE_P, Constants.LINEAR_SLIDE_I, Constants.LINEAR_SLIDE_D);
+        linearSlideMotor.setPID(
+                Constants.LINEAR_SLIDE_P,
+                Constants.LINEAR_SLIDE_I,
+                Constants.LINEAR_SLIDE_D
+        );
         linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
     }
 
+    @Override
     public void update() {
         if (Constants.CAN_LINEAR_SLIDE_SYSTEM_BE_MANIPULATED) {
-            linearSlideMotor.setPID(Constants.LINEAR_SLIDE_P, Constants.LINEAR_SLIDE_I, Constants.LINEAR_SLIDE_D);
+            linearSlideMotor.setPID(
+                    Constants.LINEAR_SLIDE_P,
+                    Constants.LINEAR_SLIDE_I,
+                    Constants.LINEAR_SLIDE_D
+            );
             linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
         }
+        vision.update();
     }
 
+    @Override
     public void stop() {
-        // Do nothing for now
+        linearSlideMotor.setPower(0);
     }
 
     public Commands command() {
