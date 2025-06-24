@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.vision;
 
 import org.firstinspires.ftc.teamcode.features.Vision;
 
+import java.util.List;
+
 public class Sample {
     public enum SampleColor {YELLOW, BLUE, RED}
     public enum State {UNKNOWN, DETECTED, FAILED}
@@ -11,6 +13,8 @@ public class Sample {
     double x, y;
     double angle;
     State state;
+    List<List<Double>> corners;
+    double x_angle, y_angle;
 
     public Sample() {
         this.color = SampleColor.YELLOW; // Default color
@@ -44,6 +48,19 @@ public class Sample {
                 return "red";
             default:
                 return "unknown";
+        }
+    }
+
+    int getColorIndex() {
+        switch (color) {
+            case YELLOW:
+                return 0;
+            case BLUE:
+                return 1;
+            case RED:
+                return 2;
+            default:
+                return -1;
         }
     }
 }

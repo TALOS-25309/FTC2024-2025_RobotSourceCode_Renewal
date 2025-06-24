@@ -30,8 +30,16 @@ public class VisionTest extends OpMode {
     public void loop() {
         vision.update();
 
-        sample.color = SAMPLE_COLOR; // Set the sample color from config
-        vision.getTargetData(sample);
+        if (vision.currentState() == Vision.State.READY) {
+            vision.request(SAMPLE_COLOR);
+        } else if (vision.currentState() != Vision.State.REQUESTED) {
+            Sample s = vision.getTargetData();
+            if (s != null) {
+                if (s.state() == Sample.State.DETECTED) {
+                    sample = s;
+                }
+            }
+        }
 
         TelemetrySystem.addClassData("VisionTest", "Sample Color", sample.color.toString());
         TelemetrySystem.addClassData("VisionTest", "Sample State", sample.state().toString());
