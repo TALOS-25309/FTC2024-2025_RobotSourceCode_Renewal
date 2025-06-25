@@ -10,7 +10,8 @@ import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Deposit implements Part {
-    private Commands commandProcessor;
+    Commands commandProcessor;
+    DepositState state = DepositState.REST;
 
     SmartServo clawServo;
     SmartServo armMainServo; // Left
@@ -94,5 +95,9 @@ public class Deposit implements Part {
 
     public Commands command() {
         return commandProcessor;
+    }
+
+    public DepositState state() {
+        return state;
     }
 }

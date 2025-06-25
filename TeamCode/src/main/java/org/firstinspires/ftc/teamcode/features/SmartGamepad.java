@@ -160,6 +160,9 @@ public class SmartGamepad {
     public Button buttonPS() {
         return new Button(gamepadNow.ps, gamepadLast.ps);
     }
+    public Button buttonOptions() {
+        return new Button(gamepadNow.options, gamepadLast.options);
+    }
     public void rumble(double duration) {
         gamepadNow.rumble((int)(duration * 1000));
     }

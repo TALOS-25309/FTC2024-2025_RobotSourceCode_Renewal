@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.vision.Vision;
 
 public class Intake implements Part {
     Commands commandProcessor;
+    IntakeState state = IntakeState.READY_TO_PICKUP;
 
     SmartServo clawServo;
     SmartServo wristOrientationServo;
@@ -21,6 +22,8 @@ public class Intake implements Part {
     SmartMotor linearSlideMotor;
 
     Vision vision;
+
+    double current_x = 0.0, current_y = 0.0, current_orientation = 0.0;
 
     @Override
     public void init(HardwareMap hardwareMap) {
@@ -94,5 +97,9 @@ public class Intake implements Part {
 
     public Commands command() {
         return this.commandProcessor;
+    }
+
+    public IntakeState state() {
+        return state;
     }
 }

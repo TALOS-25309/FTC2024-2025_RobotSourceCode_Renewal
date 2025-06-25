@@ -10,6 +10,13 @@ public class Commands {
         this.drive = drive;
     }
 
+    /**
+     * Drives the robot using mecanum drive.
+     *
+     * @param x     The x component of the drive power (left/right).
+     * @param y     The y component of the drive power (forward/backward).
+     * @param omega The rotational component of the drive power (turning).
+     */
     public void drive(double x, double y, double omega) {
         drive.sampleMecanumDrive.setWeightedDrivePower(
                 new Pose2d(
@@ -20,10 +27,18 @@ public class Commands {
         );
     }
 
+    /**
+     * Follow the given trajectory sequence with RoadRunner.
+     *
+     * @param trajectory
+     */
     public void followTrajectory(TrajectorySequence trajectory) {
         drive.sampleMecanumDrive.followTrajectorySequence(trajectory);
     }
 
+    /**
+     * Changes the robot's facing direction.
+     */
     public void changeDirection() {
         Constants.directionSign *= -1.0;
     }

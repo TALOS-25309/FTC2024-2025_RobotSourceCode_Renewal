@@ -21,8 +21,6 @@ public class AutoOpMode extends OpMode {
 
     @Override
     public void init() {
-        Global.ROBOT_STATE = Global.RobotState.NONE;
-
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);
 

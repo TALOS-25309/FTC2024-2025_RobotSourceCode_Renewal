@@ -28,7 +28,8 @@ class Constants {
     static double LINEAR_SLIDE_I = 0.0;
     static double LINEAR_SLIDE_D = 0.0;
     static double LINEAR_SLIDE_RANGE = 1000.0; // Range of the linear slide in encoder ticks
-    static double LINEAR_SLIDE_STABLE_POWER = -0.1; // Power to stabilize the linear slide when it is inside the robot
+    // Power to stabilize the linear slide when it is inside the robot
+    static double LINEAR_SLIDE_STABLE_POWER = -0.1;
     static final boolean CAN_LINEAR_SLIDE_SYSTEM_BE_MANIPULATED = true;
 
     // Positions of the servos
