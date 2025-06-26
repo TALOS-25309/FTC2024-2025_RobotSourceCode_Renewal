@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.vision.Vision;
 
 public class Intake implements Part {
     Commands commandProcessor;
+    Adjustment adjustmentProcessor;
     IntakeState state = IntakeState.READY_TO_PICKUP;
 
     SmartServo clawServo;
@@ -28,6 +29,7 @@ public class Intake implements Part {
     @Override
     public void init(HardwareMap hardwareMap) {
         this.commandProcessor = new Commands(this);
+        this.adjustmentProcessor = new Adjustment(this);
 
         // Initialize hardware components
         vision = new Vision(hardwareMap);
@@ -70,23 +72,16 @@ public class Intake implements Part {
         linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
         linearSlideMotor.resetEncoder();
         linearSlideMotor.setPID(
-                Constants.LINEAR_SLIDE_P,
-                Constants.LINEAR_SLIDE_I,
-                Constants.LINEAR_SLIDE_D
+                Constants.LINEAR_SLIDE_PID_P,
+                Constants.LINEAR_SLIDE_PID_I,
+                Constants.LINEAR_SLIDE_PID_D
         );
         linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
     }
 
     @Override
     public void update() {
-        if (Constants.CAN_LINEAR_SLIDE_SYSTEM_BE_MANIPULATED) {
-            linearSlideMotor.setPID(
-                    Constants.LINEAR_SLIDE_P,
-                    Constants.LINEAR_SLIDE_I,
-                    Constants.LINEAR_SLIDE_D
-            );
-            linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
-        }
+        adjustmentProcessor.update();
         vision.update();
     }
 
@@ -97,6 +92,10 @@ public class Intake implements Part {
 
     public Commands command() {
         return this.commandProcessor;
+    }
+
+    public Adjustment adjustment() {
+        return this.adjustmentProcessor;
     }
 
     public IntakeState state() {

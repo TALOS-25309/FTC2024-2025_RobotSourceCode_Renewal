@@ -25,9 +25,9 @@ public class TeleOpMode extends OpMode {
 
     private SmartGamepad smartGamepad1, smartGamepad2;
 
-    private Intake intake;
-    private Deposit deposit;
-    private Drive drive;
+    private final Intake intake = new Intake();
+    private final Deposit deposit = new Deposit();
+    private final Drive drive = new Drive();
 
     @Override
     public void init() {

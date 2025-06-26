@@ -9,48 +9,48 @@ class Constants {
     private Constants() {} // Prevent instantiation
 
     // Hardware Setting
-    static final String WHEEL_NAME_LEFT_FRONT = "leftFront";
-    static final String WHEEL_NAME_LEFT_REAR = "leftBack";
-    static final String WHEEL_NAME_RIGHT_FRONT = "rightFront";
-    static final String WHEEL_NAME_RIGHT_REAR = "rightBack";
+    public static final String WHEEL_NAME_LEFT_FRONT = "leftFront";
+    public static final String WHEEL_NAME_LEFT_REAR = "leftBack";
+    public static final String WHEEL_NAME_RIGHT_FRONT = "rightFront";
+    public static final String WHEEL_NAME_RIGHT_REAR = "rightBack";
 
-    static final Boolean WHEEL_REVERSE_LEFT_FRONT = false;
-    static final Boolean WHEEL_REVERSE_LEFT_REAR = true;
-    static final Boolean WHEEL_REVERSE_RIGHT_FRONT = true;
-    static final Boolean WHEEL_REVERSE_RIGHT_REAR = false;
+    public static final Boolean WHEEL_REVERSE_LEFT_FRONT = false;
+    public static final Boolean WHEEL_REVERSE_LEFT_REAR = true;
+    public static final Boolean WHEEL_REVERSE_RIGHT_FRONT = true;
+    public static final Boolean WHEEL_REVERSE_RIGHT_REAR = false;
 
-    static final String ODOMETRY_NAME_LEFT = "leftOdo";
-    static final String ODOMETRY_NAME_RIGHT = "rightOdo";
-    static final String ODOMETRY_NAME_FRONT = "frontOdo";
+    public static final String ODOMETRY_NAME_LEFT = "leftOdo";
+    public static final String ODOMETRY_NAME_RIGHT = "rightOdo";
+    public static final String ODOMETRY_NAME_FRONT = "frontOdo";
 
-    static final Boolean ODOMETRY_REVERSE_LEFT = false;
-    static final Boolean ODOMETRY_REVERSE_RIGHT = true;
-    static final Boolean ODOMETRY_REVERSE_FRONT = false;
+    public static final Boolean ODOMETRY_REVERSE_LEFT = false;
+    public static final Boolean ODOMETRY_REVERSE_RIGHT = true;
+    public static final Boolean ODOMETRY_REVERSE_FRONT = false;
 
     // Motor Speed
-    static double MOTOR_SPEED = 1.0;
-    static double MOTOR_SPEED_SLOW = 0.5;
+    public static double MOTOR_SPEED = 1.0;
+    public static double MOTOR_SPEED_SLOW = 0.5;
 
     // X, Y, Omega Weight (Speed)
-    static double VX_WEIGHT = 1.0;
-    static double VY_WEIGHT = 1.0;
-    static double OMEGA_WEIGHT = 1.0;
+    public static double VX_WEIGHT = 1.0;
+    public static double VY_WEIGHT = 1.0;
+    public static double OMEGA_WEIGHT = 1.0;
 
     // Localization
-    static boolean USING_LOCALIZATION_BASED_DRIVE = false;
-    static Pose2d AUTO_INITIAL_POSITION = new Pose2d(0, 0, 0);
-    static Pose2d TELE_INITIAL_POSITION = new Pose2d(0, 0, 0);
-    static Pose2d INITIAL_POSITION = AUTO_INITIAL_POSITION;
+    public static boolean USING_LOCALIZATION_BASED_DRIVE = false;
+    public static Pose2d AUTO_INITIAL_POSITION = new Pose2d(0, 0, 0);
+    public static Pose2d TELE_INITIAL_POSITION = new Pose2d(0, 0, 0);
+    public static Pose2d INITIAL_POSITION = AUTO_INITIAL_POSITION;
 
     // Trajectory Values
-    static Vector2d BASKET_POSITION = new Vector2d(-72, -72);
-    static double BASKET_RADIUS = 6;
-    static Vector2d SPECIMEN_POSITION = new Vector2d(0, 0);
+    public static Vector2d BASKET_POSITION = new Vector2d(-72, -72);
+    public static double BASKET_RADIUS = 6;
+    public static Vector2d SPECIMEN_POSITION = new Vector2d(0, 0);
 
-    static double directionSign = 1.0;
+    public static double directionSign = 1.0;
 
     // Synchronization Function for RoadRunner DriveConstants
-    static void SyncDriveConstantsWithRoadRunner() {
+    public static void SyncDriveConstantsWithRoadRunner() {
         org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_LEFT_FRONT = WHEEL_NAME_LEFT_FRONT;
         org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_LEFT_REAR = WHEEL_NAME_LEFT_REAR;
         org.firstinspires.ftc.teamcode.drive.DriveConstants.WHEEL_NAME_RIGHT_FRONT = WHEEL_NAME_RIGHT_FRONT;

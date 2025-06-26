@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Deposit implements Part {
     Commands commandProcessor;
+    Adjustment adjustmentProcessor;
+
     DepositState state = DepositState.REST;
 
     SmartServo clawServo;
@@ -23,6 +25,7 @@ public class Deposit implements Part {
     @Override
     public void init(HardwareMap hardwareMap) {
         this.commandProcessor = new Commands(this);
+        this.adjustmentProcessor = new Adjustment(this);
 
         // Initialize hardware components
         clawServo = new SmartServo(
@@ -63,9 +66,9 @@ public class Deposit implements Part {
         linearSlideMainMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
         linearSlideMainMotor.resetEncoder();
         linearSlideMainMotor.setPID(
-                Constants.LINEAR_SLIDE_P,
-                Constants.LINEAR_SLIDE_I,
-                Constants.LINEAR_SLIDE_D
+                Constants.LINEAR_SLIDE_PID_P,
+                Constants.LINEAR_SLIDE_PID_I,
+                Constants.LINEAR_SLIDE_PID_D
         );
         linearSlideMainMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
         linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
@@ -78,14 +81,7 @@ public class Deposit implements Part {
 
     @Override
     public void update() {
-        if (Constants.CAN_LINEAR_SLIDE_SYSTEM_BE_MANIPULATED) {
-            linearSlideMainMotor.setPID(
-                    Constants.LINEAR_SLIDE_P,
-                    Constants.LINEAR_SLIDE_I,
-                    Constants.LINEAR_SLIDE_D
-            );
-            linearSlideMainMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
-        }
+        adjustmentProcessor.update();
     }
 
     @Override
@@ -95,6 +91,10 @@ public class Deposit implements Part {
 
     public Commands command() {
         return commandProcessor;
+    }
+
+    public Adjustment adjustment() {
+        return adjustmentProcessor;
     }
 
     public DepositState state() {
