@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 
-@Autonomous(group = "auto", preselectTeleOp="TeleOpMode")
+@Autonomous(group = "Automatic", preselectTeleOp="TeleOpMode")
 public class AutoOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;

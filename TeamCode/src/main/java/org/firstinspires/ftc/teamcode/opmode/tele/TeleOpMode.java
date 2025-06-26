@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
 import org.firstinspires.ftc.teamcode.part.intake.IntakeState;
 
-@TeleOp(group = "telemetry")
+@TeleOp(group = "Telemetry")
 public class TeleOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;

@@ -7,10 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.features.PID;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
-import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 
 @Config
