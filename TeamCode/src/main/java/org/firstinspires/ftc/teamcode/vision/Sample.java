@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import org.firstinspires.ftc.teamcode.features.Vision;
-
 import java.util.List;
 
 public class Sample {

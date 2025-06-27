@@ -155,7 +155,7 @@ public class SmartMotor {
     public void update() {
         if (isPIDActivated) {
             double currentPosition = this.encoder.getCurrentPosition();
-            double error = currentPosition - targetPosition;
+            double error = targetPosition - currentPosition;
             double pidOutput = this.pidController.update(error, -motorMaximumPower, motorMaximumPower);
             this.motor.setPower(pidOutput);
             for (SmartMotor synchronizedMotor : synchronizedMotors) {

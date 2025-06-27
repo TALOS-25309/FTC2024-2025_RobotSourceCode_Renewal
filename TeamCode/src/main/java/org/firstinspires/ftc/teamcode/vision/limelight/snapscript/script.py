@@ -1,6 +1,32 @@
 import cv2
 import numpy as np
 
+def estimate_real_angle(camera_angle, view_angle_x, view_angle_y, vx, vy):
+    look = np.array([
+        np.tan(view_angle_x),
+        np.tan(view_angle_y),
+        1.0
+    ])
+    look = look / np.linalg.norm(look)
+
+    x_axis = np.cross(look, np.array([0, 1, 0]))
+    x_axis /= np.linalg.norm(x_axis)
+    y_axis = np.cross(look, x_axis)
+
+    dir3D = vx * x_axis + vy * y_axis
+
+    cos_theta = np.cos(camera_angle)
+    sin_theta = np.sin(camera_angle)
+    Rx = np.array([
+        [1,     0,      0],
+        [0,  cos_theta,  sin_theta],
+        [0, -sin_theta,  cos_theta]
+    ])
+    dir_world = Rx @ dir3D
+
+    angle = np.arctan2(dir_world[1], dir_world[0])  # dy, dx
+    return angle
+
 
 def runPipeline(image, llrobot):
     #llrobot = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -17,6 +43,7 @@ def runPipeline(image, llrobot):
     x, y, w, h = map(int, llrobot[1:5])
     view_angle_x = llrobot[5]
     view_angle_y = llrobot[6]
+    camera_angle = llrobot[7]
 
     llpython = [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -92,9 +119,8 @@ def runPipeline(image, llrobot):
         pt1 = (0, int(left_y))
         pt2 = (w - 1, int(right_y))
         cv2.line(image, pt1, pt2, (0, 0, 255), 2)
-        vy /= np.cos(view_angle_x)
-        vy /= np.cos(view_angle_y)
-        angle = np.arctan2(vy, vx) * 180 / np.pi
+
+        angle = estimate_real_angle(camera_angle, view_angle_x, view_angle_y, vx, vy)
         llpython[0] = 1
         llpython[1] = angle
         print("ANGLE : " + str(angle))

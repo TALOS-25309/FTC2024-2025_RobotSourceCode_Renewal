@@ -42,6 +42,7 @@ public class PIDTest extends OpMode {
         motor = hardwareMap.get(DcMotorEx.class, "motor");
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setDirection(DcMotor.Direction.FORWARD);
         //motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
@@ -55,7 +56,7 @@ public class PIDTest extends OpMode {
         pid.updatePID(P, I, D);
 
         double currentPosition = motor.getCurrentPosition();
-        double error = currentPosition-TARGET_POSITION;
+        double error = TARGET_POSITION - currentPosition;
         double power = pid.update(error, -MINMAX_LIMIT, MINMAX_LIMIT);
         motor.setPower(power);
 

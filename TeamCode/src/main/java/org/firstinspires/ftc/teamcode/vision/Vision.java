@@ -103,8 +103,12 @@ public class Vision {
                         maxConfidence = target.getConfidence();
                         sample.x_angle = Math.toRadians(target.getTargetXDegrees());
                         sample.y_angle = Math.toRadians(target.getTargetYDegrees());
-                        sample.x = VisionConstants.LIMELIGHT_HEIGHT * Math.tan(sample.x_angle);
-                        sample.y = VisionConstants.LIMELIGHT_HEIGHT * Math.tan(sample.y_angle + VisionConstants.LIMELIGHT_ANGLE);
+                        double h = VisionConstants.LIMELIGHT_HEIGHT;
+                        double theta = VisionConstants.LIMELIGHT_ANGLE;
+                        double phi_x = sample.x_angle;
+                        double phi_y = sample.y_angle;
+                        sample.x = h * Math.tan(phi_x) / Math.cos(theta + phi_y);
+                        sample.y = h * Math.tan(theta + phi_y);
                         sample.state = Sample.State.DETECTED;
                         sample.corners = target.getTargetCorners();
                     }
@@ -133,8 +137,8 @@ public class Vision {
                 sample.getColorIndex(),
                 x, y, w, h,
                 sample.x_angle,
-                sample.y_angle + VisionConstants.LIMELIGHT_ANGLE,
-                0.0
+                sample.y_angle,
+                VisionConstants.LIMELIGHT_ANGLE
         };
         limelight.updatePythonInputs(inputs);
     }
