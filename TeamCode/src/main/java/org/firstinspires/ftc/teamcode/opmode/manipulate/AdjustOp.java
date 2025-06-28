@@ -56,5 +56,6 @@ public class AdjustOp extends OpMode {
         for (Part part : part_list) {
             part.stop();
         }
+        Schedule.stop();
     }
 }

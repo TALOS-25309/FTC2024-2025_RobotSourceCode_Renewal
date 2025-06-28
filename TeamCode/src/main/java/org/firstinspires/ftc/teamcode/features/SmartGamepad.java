@@ -2,6 +2,21 @@ package org.firstinspires.ftc.teamcode.features;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+/**
+ * A class for simplifying the use of FTC gamepads.
+ * <p>
+ * This class provides methods to check the state of buttons, triggers, and touchpads.
+ * It also allows easy access to the current and previous states of the gamepad.
+ * <p>
+ * You need to register the gamepad when constructing this object
+ * and update the gamepad state by calling the `update()` method in the loop.
+ * <p>
+ * You can check the state of buttons, triggers, and touchpads using the provided methods.
+ * For example: <br>
+ * - `buttonA().isPressed()` checks if the A button is pressed. <br>
+ * - `triggerLeftStickX().isHeld()` checks if the left stick X trigger is held. <br>
+ * - `touchpad().getFinger1().isTouched()` checks if the first finger on the touchpad is touched.
+ */
 public class SmartGamepad {
     private Gamepad gamepadNow, gamepadLast;
 

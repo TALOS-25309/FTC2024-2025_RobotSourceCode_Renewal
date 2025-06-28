@@ -76,6 +76,7 @@ public class TeleOpMode extends OpMode {
         for (Part part : part_list) {
             part.stop();
         }
+        Schedule.stop();
     }
 
     public void controlGamepad1() {

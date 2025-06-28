@@ -4,6 +4,10 @@ import androidx.annotation.NonNull;
 
 import java.util.PriorityQueue;
 
+/**
+ * Subclass responsible for managing individual tasks.
+ * Understanding its implementation is not required.
+ */
 class Task implements Comparable<Task> {
     private final Runnable task;
     private final long delay;
@@ -37,6 +41,14 @@ class Task implements Comparable<Task> {
     }
 }
 
+/**
+ * Scheduler class for executing tasks at a specific time or asynchronously.
+ * <p>
+ * You need to call the `update` method in your OpMode's loop to make it work.
+ * Tasks can be added to the scheduler using the {@link Schedule#addTask(Runnable, double)} or {@link Schedule#addTaskAsync(Runnable, double)} methods.
+ * The `addTask` method executes the task immediately after the specified delay (in seconds).
+ * The `addTaskAsync` method executes the task in a separate thread after the specified delay (in seconds).
+ */
 public class Schedule {
     private Schedule() {}
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();

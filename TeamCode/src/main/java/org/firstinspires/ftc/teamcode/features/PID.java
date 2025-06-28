@@ -2,39 +2,74 @@ package org.firstinspires.ftc.teamcode.features;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.apache.commons.math3.analysis.function.Max;
-
+/**
+ * PID controller class for controlling motors or other systems.
+ * <p>
+ * This class implements a PID controller with proportional, integral, and derivative components.
+ * It allows for dynamic adjustment of PID coefficients and provides methods to reset the integral term.
+ */
 @Config
 public class PID {
-    public double p;
-    public double i;
-    public double d;
+    private double p;
+    private double i;
+    private double d;
+
+    /**
+     * Constructor for PID controller with specified coefficients.
+     * @param P the proportional coefficient.
+     * @param I the integral coefficient.
+     * @param D the derivative coefficient.
+     */
     public PID(double P, double I, double D){
         p=P;
         i=I;
         d=D;
     }
-    double integral = 0;
-    long lastLoopTime = System.nanoTime();
-    double lastError = 0;
-    int counter = 0;
-    double loopTime = 0.0;
-    double lastDerivative = 0.0;
+    private double integral = 0;
+    private long lastLoopTime = System.nanoTime();
+    private double lastError = 0;
+    private int counter = 0;
+    private double lastDerivative = 0.0;
 
-    public static double LOW_PASS_FILTER = 0.01; // The value to manipulate
+    /**
+     *  Low-pass filter constant for derivative smoothing.
+     *  <p>
+     * In real-world scenarios, the input consists of discrete values,
+     * so a low-pass filter is used to achieve smooth feedback.
+     */
+    public static double LOW_PASS_FILTER = 0.01; // The value to manipulate (w. FTC Dashboard)
 
+    /**
+     * Resets the integral term to zero.
+     * <p>
+     * The integral term should be reset when the target position changes.
+     */
     public void resetIntegral() {
         integral = 0;
     }
+
+    /**
+     * Getters for integral error.
+     * @return the current value of the integral term.
+     */
     public double getIntegral() { return integral; }
 
+    /**
+     * Provides feedback based on the PID controller using the given error.
+     * <p>
+     * Note: Error = target - currentValue.
+     * @param error the error value.
+     * @param min the minimum output value.
+     * @param max the maximum output value.
+     * @return the calculated PID output value, constrained between min and max.
+     */
     public double update(double error, double min, double max){
         if (counter == 0) {
             lastLoopTime = System.nanoTime() - 10000000;
         }
 
         long currentTime = System.nanoTime();
-        loopTime = (currentTime - lastLoopTime)/1000000000.0;
+        double loopTime = (currentTime - lastLoopTime) / 1000000000.0;
         lastLoopTime = currentTime; // lastLoopTime's start time
 
         double proportion = p * error;
@@ -62,6 +97,12 @@ public class PID {
         return value;
     }
 
+    /**
+     * Updates the PID coefficients dynamically.
+     * @param p the proportional coefficient.
+     * @param i the integral coefficient.
+     * @param d the derivative coefficient.
+     */
     public void updatePID(double p, double i, double d) {
         this.p = p;
         this.i = i;
