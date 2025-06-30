@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -111,6 +112,9 @@ public class Vision {
                         sample.y = h * Math.tan(theta + phi_y);
                         sample.state = Sample.State.DETECTED;
                         sample.corners = target.getTargetCorners();
+
+                        sample.x += VisionConstants.LIMELIGHT_X_DELTA;
+                        sample.y += VisionConstants.LIMELIGHT_Y_DELTA;
                     }
                 }
             }
@@ -119,20 +123,27 @@ public class Vision {
 
     private void setInputForObtainingOrientation() {
         double buffer = VisionConstants.AREA_MARGIN;
-        double x = (sample.corners.get(0).get(0)) / 2;
-        double y = (sample.corners.get(0).get(1)) / 2;
-        double w = (sample.corners.get(2).get(0) - x) / 2;
-        double h = (sample.corners.get(2).get(1) - y) / 2;
+        double x = (sample.corners.get(0).get(0));
+        double y = (sample.corners.get(0).get(1));
+        double w = (sample.corners.get(2).get(0) - x);
+        double h = (sample.corners.get(2).get(1) - y);
+
+        x /= 2;
+        y /= 2;
+        w /= 2;
+        h /= 2;
+
         x -= buffer;
         y -= buffer;
         w += buffer * 2;
         h += buffer * 2;
+
         /*
         TelemetrySystem.addClassData("Vision", "x", x);
         TelemetrySystem.addClassData("Vision", "y", y);
         TelemetrySystem.addClassData("Vision", "w", w);
         TelemetrySystem.addClassData("Vision", "h", h);
-        */
+        //*/
         double[] inputs = {
                 sample.getColorIndex(),
                 x, y, w, h,
@@ -152,12 +163,15 @@ public class Vision {
                 if (flag == 1.0) {
                     sample.state = Sample.State.DETECTED;
                     sample.angle = pythonOutputs[1];
+
+                    sample.angle += VisionConstants.AMAZING_CONSTANT
+                            * Math.toDegrees(sample.x_angle) * Math.toDegrees(sample.y_angle);
                     /*
                     TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
                     TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
                     TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
                     TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
-                    */
+                    //*/
                 } else {
                     sample.state = Sample.State.FAILED;
                 }

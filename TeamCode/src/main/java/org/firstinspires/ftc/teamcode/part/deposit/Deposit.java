@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.part.Part;
@@ -56,14 +57,16 @@ public class Deposit implements Part {
         clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
 
         armMainServo.setDirection(Servo.Direction.FORWARD);
-        armAuxServo.setDirection(Servo.Direction.REVERSE);
-        armAuxServo.synchronizeWith(Constants.ARM_SERVO_LEFT_NAME, Constants.ARM_POSITION_DIFFERENCE);
+        armAuxServo.setDirection(Servo.Direction.FORWARD);
         armMainServo.setPosition(Constants.ARM_READY_POSITION);
+        armAuxServo.setPosition(Constants.ARM_READY_POSITION);
+
+        armAuxServo.synchronizeWith(Constants.ARM_SERVO_LEFT_NAME, Constants.ARM_POSITION_DIFFERENCE);
 
         // Set motor properties
         linearSlideMainMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        linearSlideMainMotor.setMotorDirection(DcMotor.Direction.FORWARD);
-        linearSlideMainMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
+        linearSlideMainMotor.setMotorDirection(DcMotor.Direction.REVERSE);
+        linearSlideMainMotor.setEncoderDirection(DcMotor.Direction.REVERSE);
         linearSlideMainMotor.resetEncoder();
         linearSlideMainMotor.setPID(
                 Constants.LINEAR_SLIDE_PID_P,
@@ -75,7 +78,7 @@ public class Deposit implements Part {
         linearSlideMainMotor.activatePID();
 
         linearSlideAuxMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        linearSlideAuxMotor.setMotorDirection(DcMotor.Direction.REVERSE);
+        linearSlideAuxMotor.setMotorDirection(DcMotor.Direction.FORWARD);
         linearSlideAuxMotor.synchronizeWith(Constants.LINEAR_SLIDE_MAIN_MOTOR_NAME);
     }
 

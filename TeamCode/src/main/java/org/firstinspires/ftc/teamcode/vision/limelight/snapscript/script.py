@@ -1,38 +1,22 @@
 import cv2
 import numpy as np
 
-def estimate_real_angle(camera_angle, view_angle_x, view_angle_y, vx, vy):
-    look = np.array([
-        np.tan(view_angle_x),
-        np.tan(view_angle_y),
-        1.0
-    ])
-    look = look / np.linalg.norm(look)
+def realCoordinate(x, y, camera_angle_x, camera_angle_y) :
+    theta_h = math.radians(59.6)
+    theta_v = math.radians(49.7)
 
-    x_axis = np.cross(look, np.array([0, 1, 0]))
-    x_axis /= np.linalg.norm(x_axis)
-    y_axis = np.cross(look, x_axis)
+    phi_h = math.radians(camera_angle_x);
+    phi_v = math.radians(90 - camera_angle_y);
 
-    dir3D = vx * x_axis + vy * y_axis
-
-    cos_theta = np.cos(camera_angle)
-    sin_theta = np.sin(camera_angle)
-    Rx = np.array([
-        [1,     0,      0],
-        [0,  cos_theta,  sin_theta],
-        [0, -sin_theta,  cos_theta]
-    ])
-    dir_world = Rx @ dir3D
-
-    angle = np.arctan2(dir_world[1], dir_world[0])  # dy, dx
-    return angle
-
+    new_x = math.cot(phi_v-math.atan(2*y*math.tan(theta_h/2))) * math.cos(phi_h+math.atan(2*x*math.tan(theta_h/2)))
+    new_y = math.cot(phi_v-math.atan(2*y*math.tan(theta_h/2))) * math.sin(phi_h+math.atan(2*x*math.tan(theta_h/2)))
+    return new_x, new_y
 
 def runPipeline(image, llrobot):
     #llrobot = [0, 0, 0, 0, 0, 0, 0, 0]
 
     # Filter Values =====================================================================
-    yellow_filter = (10, 236, 80), (25, 255, 255)
+    yellow_filter = (6, 34, 140), (30, 255, 255)
     blue_filter = (107, 51, 45), (235, 235, 186)
     red_filter = (69, 236, 69), (113, 255, 255)
     #====================================================================================
@@ -63,6 +47,9 @@ def runPipeline(image, llrobot):
     if y >= h_img : y = 0
     if x_ <= x : x_ = w_img
     if y_ <= y : y_ = h_img
+
+    center_x = (x + x_) / 2
+    center_y = (y + y_) / 2
 
     if sample_color == "unknown":
         return np.array([[]]), image, [0, 0, 0, 0, 0, 0, 0, 0]
@@ -120,10 +107,18 @@ def runPipeline(image, llrobot):
         pt2 = (w - 1, int(right_y))
         cv2.line(image, pt1, pt2, (0, 0, 255), 2)
 
-        angle = estimate_real_angle(camera_angle, view_angle_x, view_angle_y, vx, vy)
+        rx1, ry1 = realCoordinate(center_x+vx, center_y+vy, 0, camera_angle);
+        rx2, ry2 = realCoordinate(center_x-vx, center_y-vy, 0, camera_angle);
+
+        vx = rx1 - rx2;
+        vy = ry1 - ry2;
+
+        angle = math.degrees(math.atan2(vx, vy))
         llpython[0] = 1
         llpython[1] = angle
         print("ANGLE : " + str(angle))
+
+
 
     '''
     llpython[2], llpython[3], llpython[4], llpython[5] = x___,y___,w___,h___

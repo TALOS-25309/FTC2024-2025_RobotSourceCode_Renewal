@@ -22,11 +22,18 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
         TURRET_LEFT,
         TURRET_RIGHT
     }
+    public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
     public static ServoState SERVO_STATE = ServoState.READY;
     public static double MOTOR_TARGET_POSITION_IN_CM = 0.0;
 
     @Override
+    protected void setAdjustState() {
+        this.adjustState = ADJUSTMENT_STATE;
+    }
+
+    @Override
     protected void adjustServo() {
+        intake.linearSlideMotor.stop();
         switch (SERVO_STATE) {
             case READY:
                 intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
@@ -40,6 +47,7 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
                 intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION);
                 intake.armUpDownServo.setPosition(Constants.ARM_TRANSFER_POSITION);
                 intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+                intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
                 break;
             case CLAW_OPEN:
                 intake.clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
@@ -69,6 +77,19 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
                 Constants.LINEAR_SLIDE_PID_I,
                 Constants.LINEAR_SLIDE_PID_D
         );
+
+        TelemetrySystem.addClassData(
+                "IntakeAdjustment",
+                "Current Encoder Value",
+                intake.linearSlideMotor.getCurrentPosition()
+        );
+
+        TelemetrySystem.addClassData(
+                "IntakeAdjustment",
+                "Target Value",
+                intake.linearSlideMotor.getTargetPosition()
+        );
+
         intake.linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
         intake.linearSlideMotor.activatePID();
         double fraction = Constants.LINEAR_SLIDE_RANGE / Constants.LINEAR_SLIDE_MAX_LENGTH;

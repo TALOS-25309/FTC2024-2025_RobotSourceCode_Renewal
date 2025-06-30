@@ -25,6 +25,9 @@ public class AdjustOp extends OpMode {
 
     @Override
     public void init() {
+        SmartMotor.init();
+        SmartServo.init();
+
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);
 
@@ -36,6 +39,9 @@ public class AdjustOp extends OpMode {
 
         intake.adjustment().activate();
         deposit.adjustment().activate();
+
+        TelemetrySystem.disableClass("Vision");
+        TelemetrySystem.disableClass("Drive");
     }
 
     @Override

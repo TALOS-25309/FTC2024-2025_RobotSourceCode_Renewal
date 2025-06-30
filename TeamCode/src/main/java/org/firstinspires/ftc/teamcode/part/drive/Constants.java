@@ -9,19 +9,19 @@ class Constants {
     private Constants() {} // Prevent instantiation
 
     // Hardware Setting
-    public static final String WHEEL_NAME_LEFT_FRONT = "leftFront";
-    public static final String WHEEL_NAME_LEFT_REAR = "leftBack";
-    public static final String WHEEL_NAME_RIGHT_FRONT = "rightFront";
-    public static final String WHEEL_NAME_RIGHT_REAR = "rightBack";
+    public static final String WHEEL_NAME_LEFT_FRONT = "LeftFront";
+    public static final String WHEEL_NAME_LEFT_REAR = "LeftBack";
+    public static final String WHEEL_NAME_RIGHT_FRONT = "RightFront";
+    public static final String WHEEL_NAME_RIGHT_REAR = "RightBack";
 
-    public static final Boolean WHEEL_REVERSE_LEFT_FRONT = false;
+    public static final Boolean WHEEL_REVERSE_LEFT_FRONT = true;
     public static final Boolean WHEEL_REVERSE_LEFT_REAR = true;
-    public static final Boolean WHEEL_REVERSE_RIGHT_FRONT = true;
+    public static final Boolean WHEEL_REVERSE_RIGHT_FRONT = false;
     public static final Boolean WHEEL_REVERSE_RIGHT_REAR = false;
 
-    public static final String ODOMETRY_NAME_LEFT = "leftOdo";
-    public static final String ODOMETRY_NAME_RIGHT = "rightOdo";
-    public static final String ODOMETRY_NAME_FRONT = "frontOdo";
+    public static final String ODOMETRY_NAME_LEFT = "LeftFront";
+    public static final String ODOMETRY_NAME_RIGHT = "LeftBack";
+    public static final String ODOMETRY_NAME_FRONT = "RightFront";
 
     public static final Boolean ODOMETRY_REVERSE_LEFT = false;
     public static final Boolean ODOMETRY_REVERSE_RIGHT = true;

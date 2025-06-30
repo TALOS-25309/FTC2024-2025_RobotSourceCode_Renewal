@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.part.intake;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -69,7 +70,7 @@ public class Intake implements Part {
         // Set motor properties
         linearSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         linearSlideMotor.setMotorDirection(DcMotor.Direction.FORWARD);
-        linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
+        linearSlideMotor.setEncoderDirection(DcMotor.Direction.REVERSE);
         linearSlideMotor.resetEncoder();
         linearSlideMotor.setPID(
                 Constants.LINEAR_SLIDE_PID_P,

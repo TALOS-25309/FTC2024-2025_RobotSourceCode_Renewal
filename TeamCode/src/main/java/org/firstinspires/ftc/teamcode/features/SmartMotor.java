@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.features;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.Vector;
 
@@ -20,6 +21,8 @@ public class SmartMotor {
     private final String name;
     private static final Vector<SmartMotor> smartMotors = new Vector<>();
 
+    private double encoderSign = 1.0;
+
     private double targetPosition = 0.0;
     private double previousTargetPosition = 0.0;
     private double motorMaximumPower = 1.0;
@@ -30,6 +33,10 @@ public class SmartMotor {
     private final Vector<SmartMotor> synchronizedMotors = new Vector<>();
 
     private boolean isPIDActivated = false;
+
+    public static void init() {
+        smartMotors.clear();
+    }
 
     /**
      * Constructor for SmartMotor. Uses the motor's built-in encoder.
@@ -87,7 +94,11 @@ public class SmartMotor {
      * @param direction The direction to set for the encoder.
      */
     public void setEncoderDirection(DcMotor.Direction direction) {
-        this.encoder.setDirection(direction);
+        if (direction == DcMotorSimple.Direction.FORWARD) {
+            this.encoderSign = 1.0;
+        } else {
+            this.encoderSign = -1.0;
+        }
     }
 
     /**
@@ -162,7 +173,7 @@ public class SmartMotor {
         if (isSynchronized) {
             throw new IllegalStateException("Cannot get current position while synchronized.");
         }
-        return this.encoder.getCurrentPosition();
+        return this.encoder.getCurrentPosition() * this.encoderSign;
     }
 
     /**
@@ -199,7 +210,7 @@ public class SmartMotor {
         if (isSynchronized) {
             throw new IllegalStateException("Cannot lock current power while synchronized.");
         }
-        this.targetPosition = this.encoder.getCurrentPosition();
+        this.targetPosition = this.encoder.getCurrentPosition() * this.encoderSign;
         this.previousTargetPosition = this.targetPosition;
         this.pidController.resetIntegral();
         this.isPIDActivated = false;
@@ -219,7 +230,7 @@ public class SmartMotor {
         for (SmartMotor synchronizedMotor : synchronizedMotors) {
             synchronizedMotor.motor.setPower(power);
         }
-        this.targetPosition = this.encoder.getCurrentPosition();
+        this.targetPosition = this.encoder.getCurrentPosition() * this.encoderSign;
         this.previousTargetPosition = this.targetPosition;
         this.pidController.resetIntegral();
         this.isPIDActivated = false;
@@ -261,8 +272,11 @@ public class SmartMotor {
      * it is recommended to use the {@link SmartMotor#updateAll()} method instead.
      */
     public void update() {
+        if (isSynchronized) {
+            return;
+        }
         if (isPIDActivated) {
-            double currentPosition = this.encoder.getCurrentPosition();
+            double currentPosition = this.encoder.getCurrentPosition() * this.encoderSign;
             double error = targetPosition - currentPosition;
             double pidOutput = this.pidController.update(error, -motorMaximumPower, motorMaximumPower);
             this.motor.setPower(pidOutput);

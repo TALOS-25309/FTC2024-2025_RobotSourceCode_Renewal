@@ -30,26 +30,6 @@ public class Commands {
     }
 
     /**
-     * Sets the arm position to the ready position.
-     * This method is not effective to the deposit state.
-     */
-    public void ready() {
-        deposit.state = DepositState.REST;
-
-        Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
-        }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTask(() -> {
-            deposit.command().openClaw();
-        }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
-        }, Schedule.RUN_INSTANTLY);
-    }
-
-    /**
      * Trasnfers the sample from the intake part to the deposit part.
      * This method changes the deposit state to {@link DepositState#TRANSFER_SAMPLE}
      * and it will be {@link DepositState#LOAD_SAMPLE} after the transfer is done.
@@ -70,6 +50,7 @@ public class Commands {
         }, Constants.TRANSFER_DELAY_FOR_GOTO_TRANSFER_POSITION);
 
         Schedule.addTask(() -> {
+            Constants.CLAW_CLOSED_POSITION = Constants.CLAW_CLOSED_POSITION_FOR_SAMPLE;
             deposit.command().closeClaw();
         }, Constants.TRANSFER_DELAY_FOR_CLOSE_CLAW);
 
@@ -106,19 +87,58 @@ public class Commands {
      * This method changes the deposit state to {@link DepositState#READY_TO_PICKUP}.
      */
     public void pickupSpecimen() {
-        deposit.state = DepositState.LOAD_SAMPLE;
+        deposit.state = DepositState.LOAD_SPECIMEN;
 
         Schedule.addTask(() -> {
+            Constants.CLAW_CLOSED_POSITION = Constants.CLAW_CLOSED_POSITION_FOR_SPECIMEN;
             deposit.command().closeClaw();
+        }, Schedule.RUN_INSTANTLY);
+
+        deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
+
+        Schedule.addTask(() -> {
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION);
+        }, Constants.PICKUP_DELAY_FOR_MOVE_UP_LINEAR_SLIDE);
+
+        Schedule.addTask(() -> {
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+        }, Constants.PICKUP_DELAY_FOR_GOTO_SPECIMEN_SCORING_POSITION);
+    }
+
+    /**
+     * Prepares the discard sample.
+     * This method changes the deposit state to {@link DepositState#READY_TO_DISCARD}.
+     */
+    public void poseForDiscard() {
+        deposit.state = DepositState.READY_TO_DISCARD;
+
+        Schedule.addTask(() -> {
+            deposit.armMainServo.setPosition(Constants.ARM_DISCARD_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+
+        Schedule.addTask(() -> {
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+    }
+
+    /**
+     * Prepares the discard sample.
+     * This method changes the deposit state to {@link DepositState#READY_TO_DISCARD}.
+     */
+    public void discard() {
+        deposit.state = DepositState.REST;
+
+        Schedule.addTask(() -> {
+            deposit.command().openClaw();
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
             deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_GOTO_READY_POSITION);
+        }, Constants.DISCARD_DELAY_FOR_GOTO_READY_POSITION);
 
         Schedule.addTask(() -> {
             deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_GOTO_READY_POSITION);
+        }, Constants.DISCARD_DELAY_FOR_GOTO_READY_POSITION);
     }
 
     /**

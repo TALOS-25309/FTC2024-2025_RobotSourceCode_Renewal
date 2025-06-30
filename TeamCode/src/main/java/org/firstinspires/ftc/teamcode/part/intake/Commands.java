@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.part.intake;
 
 import org.firstinspires.ftc.teamcode.features.Schedule;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.vision.Sample;
 import org.firstinspires.ftc.teamcode.vision.Vision;
@@ -162,6 +163,40 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
     }
 
+    public void compactReady() {
+        Schedule.addTask(() -> {
+            intake.current_y = 0.0;
+            intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
+            intake.linearSlideMotor.activatePID();
+            intake.command().ready();
+        }, Schedule.RUN_INSTANTLY);
+    }
+
+    public void readyForTransfer() {
+        intake.state = IntakeState.READY_FOR_TRANSFER;
+        Schedule.addTask(() -> {
+            intake.current_y = 0.0;
+            intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
+            intake.linearSlideMotor.activatePID();
+        }, Schedule.RUN_INSTANTLY);
+
+        Schedule.addTask(() -> {
+            intake.current_orientation =
+                    (Constants.WRIST_ORIENTATION_TRANSFER_POSITION
+                            - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
+                            / (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
+                            - Constants.WRIST_ORIENTATION_LEFT_LIMIT);
+            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.current_x = 0.0;
+            intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+    }
+
     /**
      * Set the intake to the transfer state.
      * This will move the wrist and arm to the transfer position,
@@ -173,42 +208,30 @@ public class Commands {
         intake.state = IntakeState.TRANSFER_SAMPLE;
 
         Schedule.addTask(() -> {
-            intake.current_y = 0.0;
-            intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
-            intake.linearSlideMotor.activatePID();
-        }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTask(() -> {
-            intake.current_orientation =
-                    (Constants.WRIST_ORIENTATION_TRANSFER_POSITION
-                    - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
-                    / (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
-                    - Constants.WRIST_ORIENTATION_LEFT_LIMIT);
-            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
-        }, Schedule.RUN_INSTANTLY);
-        Schedule.addTask(() -> {
-            intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION);
-        }, Schedule.RUN_INSTANTLY);
-        Schedule.addTask(() -> {
             intake.armUpDownServo.setPosition(Constants.ARM_TRANSFER_POSITION);
-        }, Schedule.RUN_INSTANTLY);
-        Schedule.addTask(() -> {
-            intake.current_x = 0.0;
-            intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
             intake.state = IntakeState.REST;
-
             intake.command().openClaw();
         }, Constants.TRANSFER_DELAY_FOR_OPEN_CLAW);
 
         Schedule.addTask(() -> {
+            intake.command().ready();
+        }, Constants.TRANSFER_DELAY_FOR_READY);
+
+        Schedule.addTask(() -> {
             intake.linearSlideMotor.setPower(Constants.LINEAR_SLIDE_STABLE_POWER);
-        }, Constants.TRANSFER_DELAY_FOR_LINEAR_SLIDE_STABILIZATION);
+        }, Schedule.RUN_INSTANTLY);
     }
 
     public void movePositionXY(double x, double y) {
+        TelemetrySystem.addClassData("Intake", "X", x);
+        TelemetrySystem.addClassData("Intake", "Y", y);
+
+        if(x > Constants.ARM_LENGTH) x = Constants.ARM_LENGTH;
+        else if (x < -Constants.ARM_LENGTH) x = -Constants.ARM_LENGTH;
+
         double theta = Math.asin(x / Constants.ARM_LENGTH) + Constants.TURRET_RANGE / 2.0;
         double turretPosition = theta / Constants.TURRET_RANGE;
         double targetLinearLength =
@@ -239,43 +262,49 @@ public class Commands {
         double finalLinearMotorPosition = linearMotorPosition;
         double finalTurretPosition = turretPosition;
 
-        Schedule.addTask(() -> {
-            intake.linearSlideMotor.setPosition(finalLinearMotorPosition);
-            intake.turretServo.setPosition(finalTurretPosition);
-            intake.linearSlideMotor.activatePID();
-        }, Schedule.RUN_INSTANTLY);
+        intake.linearSlideMotor.setPosition(finalLinearMotorPosition);
+        intake.turretServo.setPosition(finalTurretPosition);
+        intake.linearSlideMotor.activatePID();
     }
 
     public void movePositiondXdY(double dX, double dY) {
-        intake.current_x += dX;
-        intake.current_y += dY;
-        // TODO : Limit the position to the range
+        intake.current_x += dX * 0.5;
+        intake.current_y += dY * 0.5;
         movePositionXY(intake.current_x, intake.current_y);
     }
 
     public void rotateOrientation(double orientation) {
-        Schedule.addTask(() -> {
-            double pos = orientation *
-                    (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
-                            - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
-                    + Constants.WRIST_ORIENTATION_LEFT_LIMIT;
-            // Constraints
-            if (pos < Constants.WRIST_ORIENTATION_LEFT_LIMIT) {
-                pos = Constants.WRIST_ORIENTATION_LEFT_LIMIT;
-            } else if (pos > Constants.WRIST_ORIENTATION_RIGHT_LIMIT) {
-                pos = Constants.WRIST_ORIENTATION_RIGHT_LIMIT;
-            }
-            intake.current_orientation = (pos
-                    - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
-                    / (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
-                    - Constants.WRIST_ORIENTATION_LEFT_LIMIT);
-            intake.wristOrientationServo.setPosition(pos);
-        }, Schedule.RUN_INSTANTLY);
+        TelemetrySystem.addClassData("Intake", "Angle", orientation);
+
+        double turretTheta = intake.turretServo.getPosition() * Constants.TURRET_RANGE_IN_DEGREE
+                - Constants.TURRET_RANGE_IN_DEGREE / 2.0;
+
+        double angle = orientation - turretTheta;
+        angle += 180;
+        while (angle > 180.0) angle -= 180;
+        while (angle < 0.0) angle += 180;
+
+        double finalOrientation =  1 - angle / 180.0;
+
+        if (finalOrientation > 1.0) finalOrientation = 1.0;
+        if (finalOrientation < 0.0) finalOrientation = 0.0;
+
+        double pos = finalOrientation *
+                (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
+                        - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
+                + Constants.WRIST_ORIENTATION_LEFT_LIMIT;
+        // Constraints
+        if (pos < Constants.WRIST_ORIENTATION_LEFT_LIMIT) {
+            pos = Constants.WRIST_ORIENTATION_LEFT_LIMIT;
+        } else if (pos > Constants.WRIST_ORIENTATION_RIGHT_LIMIT) {
+            pos = Constants.WRIST_ORIENTATION_RIGHT_LIMIT;
+        }
+        intake.wristOrientationServo.setPosition(pos);
     }
 
     public void rotateDeltaOrientation(double deltaOrientation) {
         intake.current_orientation += deltaOrientation;
         // TODO : Limit the orientation to the range
-        rotateOrientation((intake.current_orientation + 90) / 180);
+        rotateOrientation(intake.current_orientation);
     }
 }

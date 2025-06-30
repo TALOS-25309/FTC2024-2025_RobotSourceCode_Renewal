@@ -26,6 +26,10 @@ public class SmartServo {
     private double syncPositionOffset = 0.0; // Difference in position for synchronized servos
     private final Vector<SmartServo> synchronizedServos = new Vector<SmartServo>();
 
+    public static void init() {
+        smartServos.clear();
+    }
+
     /**
      * Constructor for SmartServo.
      * @param servo The Servo object to control.
@@ -62,6 +66,9 @@ public class SmartServo {
     public void synchronizeWith(String name, double syncPositionOffset) {
         SmartServo parent = getServoByName(name);
         if (parent != null) {
+            if (parent == this) {
+                throw new IllegalArgumentException("Cannot synchronize itself");
+            }
             this.isSynchronized = true;
             parent.synchronizedServos.add(this);
             this.syncPositionOffset = syncPositionOffset;

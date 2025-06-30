@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.part.deposit;
 
+import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 
+@Config(value="DepositAdjustment")
 public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustment {
     private Deposit deposit;
 
@@ -11,7 +14,7 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
 
     public enum ServoState {
         READY,
-        TRASFER,
+        TRANSFER,
         SPECIMEN_PICKUP,
         BASKET_SCORING,
         SPECIMEN_FORWARD_SCORING,
@@ -19,16 +22,24 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
         OPEN_CLAW,
         CLOSE_CLAW
     }
+
+    public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
     public static ServoState SERVO_STATE = ServoState.READY;
     public static double MOTOR_TARGET_POSITION_IN_CM = 0.0;
 
     @Override
+    protected void setAdjustState() {
+        this.adjustState = ADJUSTMENT_STATE;
+    }
+
+    @Override
     protected void adjustServo() {
+        deposit.linearSlideMainMotor.stop();
         switch (SERVO_STATE) {
             case READY:
                 deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
                 break;
-            case TRASFER:
+            case TRANSFER:
                 deposit.armMainServo.setPosition(Constants.ARM_TRANSFER_POSITION);
                 break;
             case SPECIMEN_PICKUP:
@@ -59,6 +70,19 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
                 Constants.LINEAR_SLIDE_PID_I,
                 Constants.LINEAR_SLIDE_PID_D
         );
+
+        TelemetrySystem.addClassData(
+                "DepositAdjustment",
+                "Current Encoder Value",
+                deposit.linearSlideMainMotor.getCurrentPosition()
+        );
+
+        TelemetrySystem.addClassData(
+                "DepositAdjustment",
+                "Target Value",
+                deposit.linearSlideMainMotor.getTargetPosition()
+        );
+
         deposit.linearSlideMainMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
         deposit.linearSlideMainMotor.activatePID();
         double fraction = Constants.LINEAR_SLIDE_RANGE / Constants.LINEAR_SLIDE_MAX_LENGTH;
@@ -69,7 +93,7 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustme
     protected void printEncoderValue() {
         deposit.linearSlideMainMotor.setPower(0);
         TelemetrySystem.addClassData(
-                "IntakeAdjustment",
+                "DepositAdjustment",
                 "Linear Slide Encoder Value",
                 deposit.linearSlideMainMotor.getCurrentPosition()
         );

@@ -23,7 +23,7 @@ public abstract class Adjustment {
         ADJUST_PID
     }
 
-    public static State ADJUSTMENT_SATE = State.ADJUST_SERVO;
+    protected State adjustState = State.ADJUST_SERVO;
 
     private boolean isActived = false;
     public void activate() {
@@ -31,8 +31,9 @@ public abstract class Adjustment {
     }
 
     public void update() {
-        if (!isActived) {
-            switch (ADJUSTMENT_SATE) {
+        setAdjustState();
+        if (isActived) {
+            switch (adjustState) {
                 case ADJUST_SERVO:
                     adjustServo();
                     break;
@@ -46,6 +47,7 @@ public abstract class Adjustment {
         }
     }
 
+    protected abstract void setAdjustState();
     protected abstract void adjustServo();
     protected abstract void adjustPID();
     protected abstract void printEncoderValue();

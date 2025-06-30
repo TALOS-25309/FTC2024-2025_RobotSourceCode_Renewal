@@ -21,6 +21,9 @@ public class AutoOpMode extends OpMode {
 
     @Override
     public void init() {
+        SmartMotor.init();
+        SmartServo.init();
+
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);
 
