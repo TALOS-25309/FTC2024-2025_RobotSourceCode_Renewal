@@ -27,6 +27,7 @@ public class AdjustOp extends OpMode {
     public void init() {
         SmartMotor.init();
         SmartServo.init();
+        Schedule.init();
 
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);

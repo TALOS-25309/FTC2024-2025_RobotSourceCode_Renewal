@@ -279,8 +279,9 @@ public class Commands {
         double turretTheta = intake.turretServo.getPosition() * Constants.TURRET_RANGE_IN_DEGREE
                 - Constants.TURRET_RANGE_IN_DEGREE / 2.0;
 
+        orientation = -orientation;
         double angle = orientation - turretTheta;
-        angle += 180;
+        angle += 90;
         while (angle > 180.0) angle -= 180;
         while (angle < 0.0) angle += 180;
 

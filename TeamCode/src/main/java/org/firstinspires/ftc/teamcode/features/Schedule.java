@@ -54,6 +54,10 @@ public class Schedule {
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();
     public static final double RUN_INSTANTLY = 0.0;
 
+    public static void init() {
+        tasks.clear();
+    }
+
     public static void addTask(@NonNull Runnable task, double delay) {
         if (delay <= RUN_INSTANTLY) {
             task.run();
