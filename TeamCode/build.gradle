@@ -27,7 +27,7 @@ android {
         main {
             java {
                 // Exclude Roadrunner OpModes
-                exclude 'org/firstinspires/ftc/teamcode/drive/opmode/**'
+                //exclude 'org/firstinspires/ftc/teamcode/drive/opmode/**'
 
                 // Exclude Test OpModes
                 //exclude 'org/firstinspires/ftc/teamcode/opmode/test/**'
