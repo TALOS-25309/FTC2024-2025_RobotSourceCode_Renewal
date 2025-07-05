@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.features;
+package org.firstinspires.ftc.teamcode.part;
 
 /**
  * Abstract class for adjusting part classes.
