@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 
 @Config(value = "IntakeAdjustment")
-public class Adjustment extends org.firstinspires.ftc.teamcode.features.Adjustment {
+public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
     private final Intake intake;
     public Adjustment(Intake intake) {
         this.intake = intake;

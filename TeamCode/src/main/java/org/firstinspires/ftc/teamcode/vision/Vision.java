@@ -96,20 +96,31 @@ public class Vision {
         if (result != null && result.isValid()) {
             String label = sample.getLabel();
             List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-            double maxConfidence = 0.0;
+            double meanConfidence = 0.0;
+            double minAbsXDegree = 180;
             for (LLResultTypes.DetectorResult target : detectorResults) {
                 String targetLabel = target.getClassName();
                 if (targetLabel.equals(label)) {
-                    if (target.getConfidence() > maxConfidence) {
-                        maxConfidence = target.getConfidence();
+                    meanConfidence += target.getConfidence();
+                }
+            }
+            meanConfidence /= detectorResults.size();
+            for (LLResultTypes.DetectorResult target : detectorResults) {
+                String targetLabel = target.getClassName();
+                if (targetLabel.equals(label)) {
+                    if (target.getConfidence() >= meanConfidence
+                        && Math.abs(target.getTargetXDegrees()) < minAbsXDegree) {
+                        minAbsXDegree = Math.abs(target.getTargetXDegrees());
                         sample.x_angle = Math.toRadians(target.getTargetXDegrees());
                         sample.y_angle = Math.toRadians(target.getTargetYDegrees());
                         double h = VisionConstants.LIMELIGHT_HEIGHT;
-                        double theta = VisionConstants.LIMELIGHT_ANGLE;
+
                         double phi_x = sample.x_angle;
-                        double phi_y = sample.y_angle;
-                        sample.x = h * Math.tan(phi_x) / Math.cos(theta + phi_y);
-                        sample.y = h * Math.tan(theta + phi_y);
+                        double phi_y = Math.toRadians(90)
+                                - VisionConstants.LIMELIGHT_ANGLE - sample.y_angle;
+
+                        sample.x = h / Math.tan(phi_y) * Math.sin(phi_x);
+                        sample.y = h / Math.tan(phi_y) * Math.cos(phi_x);
                         sample.state = Sample.State.DETECTED;
                         sample.corners = target.getTargetCorners();
 
@@ -138,7 +149,7 @@ public class Vision {
         w += buffer * 2;
         h += buffer * 2;
 
-        /*
+        //*
         TelemetrySystem.addClassData("Vision", "x", x);
         TelemetrySystem.addClassData("Vision", "y", y);
         TelemetrySystem.addClassData("Vision", "w", w);
@@ -147,9 +158,9 @@ public class Vision {
         double[] inputs = {
                 sample.getColorIndex(),
                 x, y, w, h,
-                sample.x_angle,
-                sample.y_angle,
-                VisionConstants.LIMELIGHT_ANGLE
+                0,
+                VisionConstants.LIMELIGHT_ANGLE,
+                VisionConstants.LIMELIGHT_HEIGHT
         };
         limelight.updatePythonInputs(inputs);
     }
@@ -164,9 +175,14 @@ public class Vision {
                     sample.state = Sample.State.DETECTED;
                     sample.angle = pythonOutputs[1];
 
+                    while (sample.angle <= -90.0) sample.angle += 180.0;
+                    while (sample.angle > 90.0) sample.angle -= 180.0;
+
+                    /*
                     sample.angle += VisionConstants.AMAZING_CONSTANT
                             * Math.toDegrees(sample.x_angle) * Math.toDegrees(sample.y_angle);
-                    /*
+                     */
+                    //*
                     TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
                     TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
                     TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);

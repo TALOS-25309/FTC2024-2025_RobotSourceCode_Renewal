@@ -17,8 +17,8 @@ class Constants {
 
     // Intake system measurements (in cm, degree)
     public static final double LINEAR_SLIDE_MAX_LENGTH = 52.8; // Maximum length of the linear slide in cm
-    public static final double ARM_LENGTH = 13.5; // Length of the arm in cm
-    public static final double TURRET_RANGE_IN_DEGREE = 120.0; // Range of the turret in degrees
+    public static final double ARM_LENGTH = 13.0; // Length of the arm in cm
+    public static final double TURRET_RANGE_IN_DEGREE = 98.0; // Range of the turret in degrees
 
     static final double TURRET_RANGE = Math.toRadians(TURRET_RANGE_IN_DEGREE); // DO NOT CHANGE
 
@@ -35,9 +35,9 @@ class Constants {
     public static double CLAW_OPEN_POSITION = 0.6;
     public static double CLAW_CLOSED_POSITION = 0.405;
 
-    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.15;
-    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.84;
-    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.495;
+    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.165;
+    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.835;
+    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.5;
 
     public static double WRIST_READY_POSITION = 0.0;
     public static double WRIST_PICKUP_POSITION = 0.0;
@@ -47,8 +47,8 @@ class Constants {
     public static double ARM_PICKUP_POSITION = 0.8;
     public static double ARM_TRANSFER_POSITION = 0.32;
 
-    public static double TURRET_LEFT_LIMIT = 0.14;
-    public static double TURRET_RIGHT_LIMIT = 0.8;
+    public static double TURRET_LEFT_LIMIT = 0.25;
+    public static double TURRET_RIGHT_LIMIT = 0.69;
     public static double TURRET_TRANSFER_POSITION = 0.47;
 
     // Delays

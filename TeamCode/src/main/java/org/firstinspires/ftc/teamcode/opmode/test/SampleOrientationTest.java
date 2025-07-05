@@ -16,12 +16,17 @@ import org.firstinspires.ftc.teamcode.vision.Vision;
 
 @Config
 @TeleOp(group = "test")
-public class SampleDetectionTest extends OpMode {
+public class SampleOrientationTest extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
 
     private final Intake intake = new Intake();
     Vision vision;
     Sample sample = new Sample();
+
+    double x = 0;
+
+    double limit = 10.0;
+    double delta = 0.1;
 
     public static Sample.SampleColor SAMPLE_COLOR = Sample.SampleColor.YELLOW;
 
@@ -40,21 +45,6 @@ public class SampleDetectionTest extends OpMode {
 
     @Override
     public void start() {
-        workflow();
-    }
-
-    public void workflow() {
-        intake.command().ready();
-        Schedule.addTask(() -> {
-            detect();
-        }, 2.5);
-        Schedule.addTask(() -> {
-            intake.command().pickup();
-        }, 7);
-        Schedule.addTask(() -> {
-            intake.command().readyForTransfer();
-        }, 8);
-        Schedule.addTask(this::workflow,10);
     }
 
     public void detect() {
@@ -85,6 +75,15 @@ public class SampleDetectionTest extends OpMode {
         TelemetrySystem.addClassData("VisionTest", "Sample X", sample.getX());
         TelemetrySystem.addClassData("VisionTest", "Sample Y", sample.getY());
         TelemetrySystem.addClassData("VisionTest", "Sample Angle", sample.getAngle());
+
+        intake.command().movePositionXY(x, 0);
+        intake.command().rotateOrientation(90);
+
+        if (x > limit || x < -limit) {
+            delta *= -1;
+        }
+
+        x += delta;
 
         Schedule.update();
         SmartServo.updateAll();

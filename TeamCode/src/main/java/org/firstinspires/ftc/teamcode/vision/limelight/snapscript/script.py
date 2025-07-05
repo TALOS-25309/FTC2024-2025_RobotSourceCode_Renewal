@@ -1,19 +1,25 @@
 import cv2
 import numpy as np
+import math
 
-def realCoordinate(x, y, camera_angle_x, camera_angle_y) :
-    theta_h = math.radians(59.6)
-    theta_v = math.radians(49.7)
+def realCoordinate(x, y, camera_angle_x, camera_angle_y, h = (13.8-1.9)) :
+    theta_h = math.radians(54.505)
+    theta_v = math.radians(42.239)
 
     phi_h = math.radians(camera_angle_x);
     phi_v = math.radians(90 - camera_angle_y);
 
-    new_x = math.cot(phi_v-math.atan(2*y*math.tan(theta_h/2))) * math.cos(phi_h+math.atan(2*x*math.tan(theta_h/2)))
-    new_y = math.cot(phi_v-math.atan(2*y*math.tan(theta_h/2))) * math.sin(phi_h+math.atan(2*x*math.tan(theta_h/2)))
+    phi_h_prime = phi_h + math.atan(x * math.tan(theta_h / 2)) + math.radians(0.1)
+    phi_v_prime = phi_v - math.atan(y * math.tan(theta_v / 2)) - math.radians(0.95)
+
+    new_x = h / math.tan(phi_v_prime) * math.cos(phi_h_prime)
+    new_y = h / math.tan(phi_v_prime) * math.sin(phi_h_prime)
     return new_x, new_y
 
 def runPipeline(image, llrobot):
-    #llrobot = [0, 0, 0, 0, 0, 0, 0, 0]
+    # llrobot = [0, 0, 0, 0, 0, 0, 0, 60]
+
+    amplifier = 10.0;
 
     # Filter Values =====================================================================
     yellow_filter = (6, 34, 140), (30, 255, 255)
@@ -28,6 +34,7 @@ def runPipeline(image, llrobot):
     view_angle_x = llrobot[5]
     view_angle_y = llrobot[6]
     camera_angle = llrobot[7]
+    if camera_angle <= 0 : camera_angle = 90
 
     llpython = [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -48,8 +55,10 @@ def runPipeline(image, llrobot):
     if x_ <= x : x_ = w_img
     if y_ <= y : y_ = h_img
 
+    org_image = image.copy();
+
     center_x = (x + x_) / 2
-    center_y = (y + y_) / 2
+    center_y = 480 - (y + y_) / 2
 
     if sample_color == "unknown":
         return np.array([[]]), image, [0, 0, 0, 0, 0, 0, 0, 0]
@@ -58,21 +67,23 @@ def runPipeline(image, llrobot):
 
     filter_low_value, filter_high_value = filters[sample_color_index]
 
-    '''
+    #'''
     img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     img_threshold = cv2.inRange(img_hsv, filter_low_value, filter_high_value)
 
     contours, _ = cv2.findContours(img_threshold,
-    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                                   cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     largestContour = np.array([[]])
     llpython = [0,0,0,0,0,0,0,0]
+
+    x___,y___,w___,h___ = 0,0,0,0
 
     if len(contours) > 0:
         cv2.drawContours(image, contours, -1, 255, 2)
         largestContour = max(contours, key=cv2.contourArea)
         x___,y___,w___,h___ = cv2.boundingRect(largestContour)
-    '''
+    #'''
 
     # Crop the image by using llrobot data and resize it as original image size
     crop_img = image[y:y_, x:x_]
@@ -107,11 +118,19 @@ def runPipeline(image, llrobot):
         pt2 = (w - 1, int(right_y))
         cv2.line(image, pt1, pt2, (0, 0, 255), 2)
 
-        rx1, ry1 = realCoordinate(center_x+vx, center_y+vy, 0, camera_angle);
-        rx2, ry2 = realCoordinate(center_x-vx, center_y-vy, 0, camera_angle);
+        ry1, rx1 = realCoordinate((center_x+vx * amplifier) / (target_w/2) - 1, (center_y+vy * amplifier) / (target_h/2) - 1, 0, camera_angle);
+        ry2, rx2 = realCoordinate((center_x-vx * amplifier) / (target_w/2) - 1, (center_y-vy * amplifier) / (target_h/2) - 1, 0, camera_angle);
 
-        vx = rx1 - rx2;
-        vy = ry1 - ry2;
+        #print(realCoordinate(0,0,0,camera_angle));
+
+        vx = rx2 - rx1;
+        vy = ry2 - ry1;
+
+        left_y = (-x0 * vy / vx) + y0
+        right_y = ((w - x0) * vy / vx) + y0
+        pt1 = (0, int(left_y))
+        pt2 = (w - 1, int(right_y))
+        cv2.line(image, pt1, pt2, (0, 255, 0), 2)
 
         angle = math.degrees(math.atan2(vx, vy))
         llpython[0] = 1
@@ -120,7 +139,7 @@ def runPipeline(image, llrobot):
 
 
 
-    '''
+    #'''
     llpython[2], llpython[3], llpython[4], llpython[5] = x___,y___,w___,h___
-    '''
+    #'''
     return np.array([[]]), image, llpython
