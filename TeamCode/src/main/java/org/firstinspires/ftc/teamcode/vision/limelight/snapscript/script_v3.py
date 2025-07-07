@@ -2,24 +2,11 @@ import cv2
 import numpy as np
 import math
 
-def realCoordinate(x, y, camera_angle_x, camera_angle_y, h = (13.8-1.9)) :
-    theta_h = math.radians(54.505)
-    theta_v = math.radians(42.239)
-
-    phi_h = math.radians(camera_angle_x);
-    phi_v = math.radians(90 - camera_angle_y);
-
-    phi_h_prime = phi_h + math.atan(x * math.tan(theta_h / 2)) + math.radians(0.1)
-    phi_v_prime = phi_v - math.atan(y * math.tan(theta_v / 2)) - math.radians(0.95)
-
-    new_x = h / math.tan(phi_v_prime) * math.cos(phi_h_prime)
-    new_y = h / math.tan(phi_v_prime) * math.sin(phi_h_prime)
-    return new_x, new_y
-
 def runPipeline(image, llrobot):
-    # llrobot = [0, 0, 0, 0, 0, 0, 0, 60]
+    DEBUG = True
 
-    amplifier = 10.0;
+    if (DEBUG) :
+        llrobot = [0, 0, 0, 0, 0, 0, 0, 0]
 
     # Filter Values =====================================================================
     yellow_filter = (6, 34, 140), (30, 255, 255)
@@ -31,10 +18,6 @@ def runPipeline(image, llrobot):
     sample_color_index = int(llrobot[0])
     sample_color = ["yellow ", "blue", "red"][sample_color_index] if sample_color_index >= 0 else "unknown"
     x, y, w, h = map(int, llrobot[1:5])
-    view_angle_x = llrobot[5]
-    view_angle_y = llrobot[6]
-    camera_angle = llrobot[7]
-    if camera_angle <= 0 : camera_angle = 90
 
     llpython = [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -110,6 +93,9 @@ def runPipeline(image, llrobot):
     ys, xs = np.where(image[:, :, 0] == 255)
     if len(xs) > 100:
         points = np.column_stack((xs, ys)).astype(np.int32)
+        if (DEBUG) :
+            mean_point = np.mean(points, axis = 0)
+            center_x, center_y = mean_point
         [vx, vy, x0, y0] = cv2.fitLine(points, cv2.DIST_L2, 0, 0.01, 0.01)
         h, w = image.shape[:2]
         left_y = (-x0 * vy / vx) + y0
@@ -118,23 +104,10 @@ def runPipeline(image, llrobot):
         pt2 = (w - 1, int(right_y))
         cv2.line(image, pt1, pt2, (0, 0, 255), 2)
 
-        ry1, rx1 = realCoordinate((center_x+vx * amplifier) / (target_w/2) - 1, (center_y+vy * amplifier) / (target_h/2) - 1, 0, camera_angle);
-        ry2, rx2 = realCoordinate((center_x-vx * amplifier) / (target_w/2) - 1, (center_y-vy * amplifier) / (target_h/2) - 1, 0, camera_angle);
-
-        #print(realCoordinate(0,0,0,camera_angle));
-
-        vx = rx2 - rx1;
-        vy = ry2 - ry1;
-
-        left_y = (-x0 * vy / vx) + y0
-        right_y = ((w - x0) * vy / vx) + y0
-        pt1 = (0, int(left_y))
-        pt2 = (w - 1, int(right_y))
-        cv2.line(image, pt1, pt2, (0, 255, 0), 2)
-
         angle = math.degrees(math.atan2(vx, vy))
         llpython[0] = 1
         llpython[1] = angle
+
         print("ANGLE : " + str(angle))
 
 

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.vision.Vision;
 
@@ -84,6 +85,10 @@ public class Intake implements Part {
     public void update() {
         adjustmentProcessor.update();
         vision.update();
+
+        TelemetrySystem.addClassData("Intake", "X", this.current_x);
+        TelemetrySystem.addClassData("Intake", "Y", this.current_y);
+        TelemetrySystem.addClassData("Intake", "Omega", this.current_orientation);
     }
 
     @Override

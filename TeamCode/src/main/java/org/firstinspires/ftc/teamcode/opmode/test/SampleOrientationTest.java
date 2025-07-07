@@ -23,11 +23,6 @@ public class SampleOrientationTest extends OpMode {
     Vision vision;
     Sample sample = new Sample();
 
-    double x = 0;
-
-    double limit = 10.0;
-    double delta = 0.1;
-
     public static Sample.SampleColor SAMPLE_COLOR = Sample.SampleColor.YELLOW;
 
     @Override
@@ -45,13 +40,6 @@ public class SampleOrientationTest extends OpMode {
 
     @Override
     public void start() {
-    }
-
-    public void detect() {
-        if(sample.state() == Sample.State.DETECTED) {
-            intake.command().movePositionXY(sample.getX(), sample.getY());
-            intake.command().rotateOrientation(sample.getAngle());
-        }
     }
 
     @Override
@@ -76,14 +64,7 @@ public class SampleOrientationTest extends OpMode {
         TelemetrySystem.addClassData("VisionTest", "Sample Y", sample.getY());
         TelemetrySystem.addClassData("VisionTest", "Sample Angle", sample.getAngle());
 
-        intake.command().movePositionXY(x, 0);
-        intake.command().rotateOrientation(90);
-
-        if (x > limit || x < -limit) {
-            delta *= -1;
-        }
-
-        x += delta;
+        intake.command().rotateOrientation(sample.getAngle());
 
         Schedule.update();
         SmartServo.updateAll();

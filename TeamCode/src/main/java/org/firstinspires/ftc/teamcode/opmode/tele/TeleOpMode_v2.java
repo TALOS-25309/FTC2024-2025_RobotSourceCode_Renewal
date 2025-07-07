@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmode.tele;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -19,9 +18,8 @@ import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
 import org.firstinspires.ftc.teamcode.part.intake.IntakeState;
 
-@Disabled
 @TeleOp(group = "Telemetry")
-public class TeleOpMode extends OpMode {
+public class TeleOpMode_v2 extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;
 
@@ -126,8 +124,7 @@ public class TeleOpMode extends OpMode {
                 intake.command().automaticTargetForAllianceSample();
             }
         }
-        if (intake.state() == IntakeState.READY_TO_PICKUP
-            || intake.state() == IntakeState.PICKED_UP) {
+        if (intake.state() == IntakeState.READY_TO_PICKUP) {
             intake.command().movePositiondXdY(
                 smartGamepad1.triggerLeftStickX().getValue(),
                 -smartGamepad1.triggerLeftStickY().getValue()
@@ -170,24 +167,21 @@ public class TeleOpMode extends OpMode {
 
     public void controlGamepad2() {
         // Controlling Drive Part
-        if (Math.abs(smartGamepad2.triggerLeftStickX().getValue()) > 0.0
-        || Math.abs(smartGamepad2.triggerLeftStickY().getValue()) > 0.0){
-            drive.command().drive(
-                    smartGamepad2.triggerLeftStickX().getValue(),
-                    -smartGamepad2.triggerLeftStickY().getValue(),
-                    (smartGamepad2.triggerRightTrigger().getValue()
-                            - smartGamepad2.triggerLeftTrigger().getValue()) * 0.4
-            );
-        } else {
-            drive.command().drive(
-                    smartGamepad2.triggerRightStickX().getValue() * 0.3,
-                    -smartGamepad2.triggerRightStickY().getValue() * 0.3,
-                    (smartGamepad2.triggerRightTrigger().getValue()
-                            - smartGamepad2.triggerLeftTrigger().getValue()) * 0.4
-            );
-        }
+        drive.command().drive(
+                Math.pow(smartGamepad2.triggerLeftStickX().getValue(), 3),
+                -Math.pow(smartGamepad2.triggerLeftStickY().getValue(), 3),
+                (smartGamepad2.triggerRightTrigger().getValue()
+                        - smartGamepad2.triggerLeftTrigger().getValue()) * 0.4
+        );
 
         // Controlling Intake & Deposit Parts
+        if (intake.state() == IntakeState.READY_TO_PICKUP
+                || intake.state() == IntakeState.PICKED_UP) {
+            intake.command().movePositiondXdY(
+                    0,
+                    -smartGamepad1.triggerLeftStickY().getValue() * 2.0
+            );
+        }
         if (smartGamepad2.buttonTriangle().isPressed()) {
             if(intake.state() == IntakeState.READY_FOR_TRANSFER) {
                 intake.command().drop();

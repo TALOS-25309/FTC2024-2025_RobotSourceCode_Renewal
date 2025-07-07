@@ -20,7 +20,6 @@ public class SampleDetectionTest extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
 
     private final Intake intake = new Intake();
-    Vision vision;
     Sample sample = new Sample();
 
     public static Sample.SampleColor SAMPLE_COLOR = Sample.SampleColor.YELLOW;
@@ -34,7 +33,6 @@ public class SampleDetectionTest extends OpMode {
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);
 
-        vision = new Vision(hardwareMap);
         intake.init(hardwareMap);
     }
 
@@ -46,45 +44,20 @@ public class SampleDetectionTest extends OpMode {
     public void workflow() {
         intake.command().ready();
         Schedule.addTask(() -> {
-            detect();
-        }, 2.5);
+            intake.command().automaticTargetForYellowSample();
+        }, 4.0);
         Schedule.addTask(() -> {
             intake.command().pickup();
-        }, 7);
+        }, 8.0);
         Schedule.addTask(() -> {
             intake.command().readyForTransfer();
-        }, 8);
+        }, 9.0);
         Schedule.addTask(this::workflow,10);
-    }
-
-    public void detect() {
-        if(sample.state() == Sample.State.DETECTED) {
-            intake.command().movePositionXY(sample.getX(), sample.getY());
-            intake.command().rotateOrientation(sample.getAngle());
-        }
     }
 
     @Override
     public void loop() {
         intake.update();
-        vision.update();
-
-        if (vision.currentState() == Vision.State.READY) {
-            vision.request(SAMPLE_COLOR);
-        } else if (vision.currentState() != Vision.State.REQUESTED) {
-            Sample s = vision.getTargetData();
-            if (s != null) {
-                if (s.state() == Sample.State.DETECTED) {
-                    sample = s;
-                }
-            }
-        }
-
-        TelemetrySystem.addClassData("VisionTest", "Sample Color", sample.color.toString());
-        TelemetrySystem.addClassData("VisionTest", "Sample State", sample.state().toString());
-        TelemetrySystem.addClassData("VisionTest", "Sample X", sample.getX());
-        TelemetrySystem.addClassData("VisionTest", "Sample Y", sample.getY());
-        TelemetrySystem.addClassData("VisionTest", "Sample Angle", sample.getAngle());
 
         Schedule.update();
         SmartServo.updateAll();

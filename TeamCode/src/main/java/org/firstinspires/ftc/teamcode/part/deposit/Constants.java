@@ -22,31 +22,31 @@ public class Constants {
     public static double LINEAR_SLIDE_RANGE = 63000; // Range of the linear slide in encoder ticks
 
     // Positions of the servos
-    public static double CLAW_OPEN_POSITION = 0.4;
+    public static double CLAW_OPEN_POSITION = 0.35;
     public static double CLAW_CLOSED_POSITION = 0.5;
     public static double CLAW_CLOSED_POSITION_FOR_SPECIMEN = 0.593;
     public static double CLAW_CLOSED_POSITION_FOR_SAMPLE = 0.5;
 
     public static double ARM_POSITION_DIFFERENCE = 0.0; // Delta position for arm movement
-    public static double ARM_READY_POSITION = 0.2;
-    public static double ARM_TRANSFER_POSITION = 0.2;
-    public static double ARM_SPECIMEN_PICKUP_POSITION = 0.965;
-    public static double ARM_BASKET_SCORING_POSITION = 0.7;
-    public static double ARM_SPECIMEN_SCORING_FORWARD_POSITION = 0.14;
+    public static double ARM_READY_POSITION = 0.12;
+    public static double ARM_TRANSFER_POSITION = 0.12;
+    public static double ARM_SPECIMEN_PICKUP_POSITION = 0.93;
+    public static double ARM_BASKET_SCORING_POSITION = 0.62;
+    public static double ARM_SPECIMEN_SCORING_FORWARD_POSITION = 0.12;
     public static double ARM_SPECIMEN_SCORING_BACKWARD_POSITION = 0.5; // TODO
-    public static double ARM_DISCARD_POSITION = 0.9;
+    public static double ARM_DISCARD_POSITION = 0.8;
 
     // Positions of the linear slide (in cm)
     public static final double LINEAR_SLIDE_READY_POSITION_IN_CM = 0.0;
     public static final double LINEAR_SLIDE_TRANSFER_POSITION_IN_CM = 0.0;
-    public static final double LINEAR_SLIDE_SPECIMEN_PICKUP_POSITION_IN_CM = 7.0;
+    public static final double LINEAR_SLIDE_SPECIMEN_PICKUP_POSITION_IN_CM = 7;
     public static final double LINEAR_SLIDE_SPECIMEN_AFTER_PICKUP_POSITION_IN_CM = 10.0;
     public static final double LINEAR_SLIDE_LOW_BASKET_SCORING_POSITION_IN_CM = 25.0;
     public static final double LINEAR_SLIDE_HIGH_BASKET_SCORING_POSITION_IN_CM = 69.0;
-    public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 30.0; // TODO
-    public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 30.0; // TODO
-    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 32.0;
-    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 40.0; // TODO
+    public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 0.0; // TODO
+    public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 0.0; // TODO
+    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 27.0;
+    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 0.0; // TODO
     public static final double LINEAR_SLIDE_MAX_LENGTH = 114.3 - 43; // Maximum length of the linear slide in cm
 
     private static final double LINEAR_SLIDE_ENCODER_VALUE_FRACTION

@@ -2,7 +2,10 @@ package org.firstinspires.ftc.teamcode.features;
 
 import androidx.annotation.NonNull;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.function.BooleanSupplier;
 
 /**
  * Subclass responsible for managing individual tasks.
@@ -41,6 +44,20 @@ class Task implements Comparable<Task> {
     }
 }
 
+class ConditionalTask extends Task {
+    private final BooleanSupplier condition;
+
+    public ConditionalTask(Runnable task, long delay, BooleanSupplier condition) {
+        super(task, delay, false);
+        this.condition = condition;
+    }
+
+    @Override
+    public boolean isReady(long currentTime) {
+        return super.isReady(currentTime) && condition.getAsBoolean();
+    }
+}
+
 /**
  * Scheduler class for executing tasks at a specific time or asynchronously.
  * <p>
@@ -52,6 +69,7 @@ class Task implements Comparable<Task> {
 public class Schedule {
     private Schedule() {}
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();
+    private static final LinkedList<ConditionalTask> conditionalTasks = new LinkedList<>();
     public static final double RUN_INSTANTLY = 0.0;
 
     public static void init() {
@@ -66,6 +84,19 @@ public class Schedule {
         }
     }
 
+    public static void addConditionalTask(@NonNull Runnable task, double delay, BooleanSupplier condition) {
+        if (delay <= RUN_INSTANTLY) {
+            if (condition.getAsBoolean()) {
+                task.run();
+            }
+        } else {
+            conditionalTasks.add(new ConditionalTask(task, System.nanoTime() + (long) (delay * 1e9), condition));
+        }
+    }
+
+    // This feature should be use with caution.
+    // It is recommended to use addTask instead of this method.
+    // Thread safety is not guaranteed.
     public static void addTaskAsync(@NonNull Runnable task, double delay) {
         if (delay <= RUN_INSTANTLY) {
             new Thread(task).start();
@@ -76,9 +107,19 @@ public class Schedule {
 
     public static void update() {
         long currentTime = System.nanoTime();
+
         while (!tasks.isEmpty()) {
             if (!tasks.peek().isReady(currentTime)) break;
             tasks.poll().run();
+        }
+
+        Iterator<ConditionalTask> iterator = conditionalTasks.iterator();
+        while (iterator.hasNext()) {
+            ConditionalTask conditionalTask = iterator.next();
+            if (conditionalTask.isReady(currentTime)) {
+                conditionalTask.run();
+                iterator.remove();
+            }
         }
     }
 

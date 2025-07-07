@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -13,6 +12,9 @@ import java.util.List;
 
 public class Vision {
     private final Limelight3A limelight;
+    private int repetition = VisionConstants.REPETITION;
+    private double previousTimestamp = 0.0;
+    private double detectionCnt = 0.0;
 
     public enum State {
         READY, REQUESTED, DETECTED, FAILED
@@ -33,29 +35,75 @@ public class Vision {
     }
 
     public void update() {
-        LLStatus status = limelight.getStatus();
-
-        TelemetrySystem.addClassData("Vision", "name", status.getName());
-        TelemetrySystem.addClassData("Vision", "temp", status.getTemp());
-        TelemetrySystem.addClassData("Vision", "cpu", status.getCpu());
-        TelemetrySystem.addClassData("Vision", "fps", (int) status.getFps());
-
         if (state == State.REQUESTED) {
+            LLStatus status = limelight.getStatus();
+
+            TelemetrySystem.addClassData("Vision", "name", status.getName());
+            TelemetrySystem.addClassData("Vision", "temp", status.getTemp());
+            TelemetrySystem.addClassData("Vision", "cpu", status.getCpu());
+            TelemetrySystem.addClassData("Vision", "fps", (int) status.getFps());
+
+            LLResult result = limelight.getLatestResult();
+
+            if (result == null) return;
+
             if (innerState == InnerState.WAITING_FOR_DETECTION) {
-                if (status.getPipelineIndex() == VisionConstants.DETECTION_PIPELINE_ID) {
-                    detectTarget();
-                    if (sample.state == Sample.State.DETECTED) {
-                        innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
-                        limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
-                        setInputForObtainingOrientation();
-                    } else {
-                        state = State.FAILED;
-                        innerState = InnerState.COMPLETED;
+                if (!result.isValid()) return;
+                if (result.getPipelineIndex() == VisionConstants.DETECTION_PIPELINE_ID) {
+                    if (result.getTimestamp() != previousTimestamp) {
+                        previousTimestamp = result.getTimestamp();
+                        repetition--;
+
+                        Sample s = detectTarget(result);
+
+                        if (s.state == Sample.State.DETECTED) {
+                            sample.state = Sample.State.DETECTED;
+                            sample.x += s.x;
+                            sample.y += s.y;
+                            sample.x_angle += s.x_angle;
+                            sample.y_angle += s.y_angle;
+                            if (sample.corners == null || sample.corners.isEmpty()) {
+                                sample.corners = s.corners;
+                            } else {
+                                for (int i = 0; i < sample.corners.size(); i++) {
+                                    List<Double> sampleCorner = sample.corners.get(i);
+                                    List<Double> sCorner = s.corners.get(i);
+                                    for (int j = 0; j < sampleCorner.size(); j++) {
+                                        sampleCorner.set(j, sampleCorner.get(j) + sCorner.get(j));
+                                    }
+                                }
+                            }
+                            detectionCnt++;
+                        }
+
+                        if(repetition <= 0) {
+                            if (sample.state == Sample.State.DETECTED) {
+                                sample.x /= detectionCnt;
+                                sample.y /= detectionCnt;
+                                sample.x_angle /= detectionCnt;
+                                sample.y_angle /= detectionCnt;
+                                for (int i = 0; i < sample.corners.size(); i++) {
+                                    List<Double> sampleCorner = sample.corners.get(i);
+                                    for (int j = 0; j < sampleCorner.size(); j++) {
+                                        sampleCorner.set(j, sampleCorner.get(j) / detectionCnt);
+                                    }
+                                }
+
+                                innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
+                                limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
+                                setInputForObtainingOrientation();
+                            } else {
+                                state = State.FAILED;
+                                innerState = InnerState.COMPLETED;
+                            }
+                        }
                     }
                 }
             } else if (innerState == InnerState.WAITING_FOR_OBTAINING_ORIENTATION) {
-                if (status.getPipelineIndex() == VisionConstants.ORIENTATION_PIPELINE_ID) {
-                    obtainOrientation();
+                if (result.getPipelineIndex() == VisionConstants.ORIENTATION_PIPELINE_ID) {
+                    Sample s = obtainOrientation(result);
+                    sample.state = s.state;
+                    sample.angle = s.angle;
                     if (sample.state == Sample.State.DETECTED) {
                         state = State.DETECTED;
                     } else {
@@ -73,6 +121,8 @@ public class Vision {
             sample.color = color;
             sample.state = Sample.State.FAILED;
             state = State.REQUESTED;
+            repetition = VisionConstants.REPETITION;
+            detectionCnt = 0.0;
             innerState = InnerState.WAITING_FOR_DETECTION;
             limelight.pipelineSwitch(VisionConstants.DETECTION_PIPELINE_ID);
         }
@@ -91,45 +141,47 @@ public class Vision {
         }
     }
 
-    private void detectTarget() {
-        LLResult result = limelight.getLatestResult();
-        if (result != null && result.isValid()) {
-            String label = sample.getLabel();
-            List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-            double meanConfidence = 0.0;
-            double minAbsXDegree = 180;
-            for (LLResultTypes.DetectorResult target : detectorResults) {
-                String targetLabel = target.getClassName();
-                if (targetLabel.equals(label)) {
-                    meanConfidence += target.getConfidence();
-                }
+    private Sample detectTarget(LLResult result) {
+        String label = sample.getLabel();
+
+        Sample sample = new Sample();
+        sample.color = this.sample.color;
+
+        List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
+        double meanConfidence = 0.0;
+        double minAbsXDegree = 180;
+        for (LLResultTypes.DetectorResult target : detectorResults) {
+            String targetLabel = target.getClassName();
+            if (targetLabel.equals(label)) {
+                meanConfidence += target.getConfidence();
             }
-            meanConfidence /= detectorResults.size();
-            for (LLResultTypes.DetectorResult target : detectorResults) {
-                String targetLabel = target.getClassName();
-                if (targetLabel.equals(label)) {
-                    if (target.getConfidence() >= meanConfidence
-                        && Math.abs(target.getTargetXDegrees()) < minAbsXDegree) {
-                        minAbsXDegree = Math.abs(target.getTargetXDegrees());
-                        sample.x_angle = Math.toRadians(target.getTargetXDegrees());
-                        sample.y_angle = Math.toRadians(target.getTargetYDegrees());
-                        double h = VisionConstants.LIMELIGHT_HEIGHT;
+        }
+        meanConfidence /= detectorResults.size();
+        for (LLResultTypes.DetectorResult target : detectorResults) {
+            String targetLabel = target.getClassName();
+            if (targetLabel.equals(label)) {
+                if (target.getConfidence() >= meanConfidence
+                    && Math.abs(target.getTargetXDegrees()) < minAbsXDegree) {
+                    minAbsXDegree = Math.abs(target.getTargetXDegrees());
+                    sample.x_angle = Math.toRadians(target.getTargetXDegrees());
+                    sample.y_angle = Math.toRadians(target.getTargetYDegrees());
+                    double h = VisionConstants.LIMELIGHT_HEIGHT;
 
-                        double phi_x = sample.x_angle;
-                        double phi_y = Math.toRadians(90)
-                                - VisionConstants.LIMELIGHT_ANGLE - sample.y_angle;
+                    double phi_x = sample.x_angle;
+                    double phi_y = Math.toRadians(90)
+                            - VisionConstants.LIMELIGHT_ANGLE - sample.y_angle;
 
-                        sample.x = h / Math.tan(phi_y) * Math.sin(phi_x);
-                        sample.y = h / Math.tan(phi_y) * Math.cos(phi_x);
-                        sample.state = Sample.State.DETECTED;
-                        sample.corners = target.getTargetCorners();
+                    sample.x = h / Math.tan(phi_y) * Math.sin(phi_x);
+                    sample.y = h / Math.tan(phi_y) * Math.cos(phi_x);
+                    sample.state = Sample.State.DETECTED;
+                    sample.corners = target.getTargetCorners();
 
-                        sample.x += VisionConstants.LIMELIGHT_X_DELTA;
-                        sample.y += VisionConstants.LIMELIGHT_Y_DELTA;
-                    }
+                    sample.x += VisionConstants.LIMELIGHT_X_DELTA;
+                    sample.y += VisionConstants.LIMELIGHT_Y_DELTA;
                 }
             }
         }
+        return sample;
     }
 
     private void setInputForObtainingOrientation() {
@@ -165,33 +217,33 @@ public class Vision {
         limelight.updatePythonInputs(inputs);
     }
 
-    private void obtainOrientation() {
-        LLResult result = limelight.getLatestResult();
-        if (result != null) {
-            double[] pythonOutputs = result.getPythonOutput();
-            if (pythonOutputs != null && pythonOutputs.length > 0) {
-                double flag = pythonOutputs[0];
-                if (flag == 1.0) {
-                    sample.state = Sample.State.DETECTED;
-                    sample.angle = pythonOutputs[1];
+    private Sample obtainOrientation(LLResult result) {
+        Sample sample = new Sample();
 
-                    while (sample.angle <= -90.0) sample.angle += 180.0;
-                    while (sample.angle > 90.0) sample.angle -= 180.0;
+        double[] pythonOutputs = result.getPythonOutput();
+        if (pythonOutputs != null && pythonOutputs.length > 0) {
+            double flag = pythonOutputs[0];
+            if (flag == 1.0) {
+                sample.state = Sample.State.DETECTED;
+                sample.angle = pythonOutputs[1];
 
-                    /*
-                    sample.angle += VisionConstants.AMAZING_CONSTANT
-                            * Math.toDegrees(sample.x_angle) * Math.toDegrees(sample.y_angle);
-                     */
-                    //*
-                    TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
-                    TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
-                    TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
-                    TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
-                    //*/
-                } else {
-                    sample.state = Sample.State.FAILED;
-                }
+                while (sample.angle <= -90.0) sample.angle += 180.0;
+                while (sample.angle > 90.0) sample.angle -= 180.0;
+
+                /*
+                sample.angle += VisionConstants.AMAZING_CONSTANT
+                        * Math.toDegrees(sample.x_angle) * Math.toDegrees(sample.y_angle);
+                 */
+                //*
+                TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
+                TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
+                TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
+                TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
+                //*/
+            } else {
+                sample.state = Sample.State.FAILED;
             }
         }
+        return sample;
     }
 }

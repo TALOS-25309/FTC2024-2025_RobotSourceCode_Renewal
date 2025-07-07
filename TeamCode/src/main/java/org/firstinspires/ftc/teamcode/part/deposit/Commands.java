@@ -97,7 +97,7 @@ public class Commands {
         deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
 
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Constants.PICKUP_DELAY_FOR_MOVE_UP_LINEAR_SLIDE);
 
         Schedule.addTask(() -> {

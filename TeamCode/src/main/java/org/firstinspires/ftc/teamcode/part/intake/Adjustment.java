@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.part.intake;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 
 @Config(value = "IntakeAdjustment")
@@ -20,7 +21,8 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         WRIST_ORIENTATION_LEFT,
         WRIST_ORIENTATION_RIGHT,
         TURRET_LEFT,
-        TURRET_RIGHT
+        TURRET_RIGHT,
+        DROP
     }
     public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
     public static ServoState SERVO_STATE = ServoState.READY;
@@ -48,6 +50,11 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 intake.armUpDownServo.setPosition(Constants.ARM_TRANSFER_POSITION);
                 intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
                 intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+                break;
+            case DROP:
+                intake.wristUpDownServo.setPosition(Constants.WRIST_DROP_POSITION);
+                intake.turretServo.setPosition(Constants.TURRET_DROP_POSITION);
+                intake.clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
                 break;
             case CLAW_OPEN:
                 intake.clawServo.setPosition(Constants.CLAW_OPEN_POSITION);

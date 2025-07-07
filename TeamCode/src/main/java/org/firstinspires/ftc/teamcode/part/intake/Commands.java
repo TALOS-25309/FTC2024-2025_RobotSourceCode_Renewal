@@ -52,6 +52,9 @@ public class Commands {
         Schedule.addTask(() -> {
             intake.command().openClaw();
         }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.command().rotateOrientation(intake.current_orientation);
+        }, Schedule.RUN_INSTANTLY);
     }
 
     /**
@@ -62,39 +65,61 @@ public class Commands {
      *
      * @param color The color of the sample to detect.
      */
-    private void automaticReady(Sample.SampleColor color) {
+    private void automaticTarget(Sample.SampleColor color) {
+        if (Global.DETECTING) {
+            return;
+        }
+
+        Global.DETECTING = true;
+
+        Schedule.addTask(() -> {
+            intake.command().ready();
+        }, Schedule.RUN_INSTANTLY);
+
         intake.state = IntakeState.AUTO_DETECTING;
 
         // Automatically set hand position and orientation
         Schedule.addTask(() -> {
-           intake.vision.request(color);
-        }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTaskAsync(() -> {
-            while(intake.vision.currentState() != Vision.State.DETECTED
-                    && intake.vision.currentState() != Vision.State.FAILED) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
+            intake.vision.request(color);
+        }, Constants.DETECTION_DELAY);
+        Schedule.addConditionalTask(() -> {
             intake.state = IntakeState.READY_TO_PICKUP;
             Sample sample = intake.vision.getTargetData();
+
+            Global.DETECTING = false;
+
+            TelemetrySystem.addClassData("Intake", "State", sample.state().toString());
             if (sample.state() == Sample.State.DETECTED) {
                 double x = sample.getX();
                 double y = sample.getY();
-                double omega = (sample.getAngle() + 90) / 180;
+                double omega = sample.getAngle();
+
+                TelemetrySystem.addClassData("Intake", "Sample Color", sample.color.toString());
+                TelemetrySystem.addClassData("Intake", "Sample X", sample.getX());
+                TelemetrySystem.addClassData("Intake", "Sample Y", sample.getY());
+                TelemetrySystem.addClassData("Intake", "Sample Angle", sample.getAngle());
+
+                double currentTurretAngle = intake.turretServo.getPosition() * Constants.TURRET_RANGE
+                        - Constants.TURRET_RANGE / 2.0;
+
+                double finalX = x * Math.cos(currentTurretAngle) - y * Math.sin(currentTurretAngle);
+                double finalY = x * Math.sin(currentTurretAngle) + y * Math.cos(currentTurretAngle);
+
+                double finalOmega = omega - Math.toDegrees(currentTurretAngle);
+
                 Schedule.addTask(() -> {
-                    intake.command().movePositionXY(x,y);
-                    intake.command().rotateOrientation(omega);
+                    intake.command().movePositiondXdY(finalX,finalY);
+                    intake.command().rotateOrientation(finalOmega);
                 }, Schedule.RUN_INSTANTLY);
                 Schedule.addTask(() -> {
                     intake.command().ready();
                 }, Schedule.RUN_INSTANTLY);
+
+                Schedule.addTask(() -> {
+                    intake.command().pickup();
+                }, Constants.AUTO_PICKUP_DELAY_FOR_PICK_UP);
             }
-        }, Schedule.RUN_INSTANTLY);
+        }, Constants.DETECTION_DELAY, () -> intake.vision.currentState() != Vision.State.REQUESTED);
     }
 
     /**
@@ -103,13 +128,13 @@ public class Commands {
      * State will be set to {@link IntakeState#AUTO_DETECTING}
      * and then to {@link IntakeState#READY_TO_PICKUP} when the sample is detected.
      */
-    public void automaticReadyForAllianceSample() {
+    public void automaticTargetForAllianceSample() {
         if (Global.ALLIANCE == Global.Alliance.RED) {
-            automaticReady(Sample.SampleColor.RED);
+            automaticTarget(Sample.SampleColor.RED);
         } else if (Global.ALLIANCE == Global.Alliance.BLUE) {
-            automaticReady(Sample.SampleColor.BLUE);
+            automaticTarget(Sample.SampleColor.BLUE);
         } else {
-            automaticReady(Sample.SampleColor.YELLOW);
+            automaticTarget(Sample.SampleColor.YELLOW);
         }
     }
 
@@ -119,8 +144,8 @@ public class Commands {
      * State will be set to {@link IntakeState#AUTO_DETECTING}
      * and then to {@link IntakeState#READY_TO_PICKUP} when the sample is detected.
      */
-    public void automaticReadyForYellowSample() {
-        automaticReady(Sample.SampleColor.YELLOW);
+    public void automaticTargetForYellowSample() {
+        automaticTarget(Sample.SampleColor.YELLOW);
     }
 
     /**
@@ -132,9 +157,12 @@ public class Commands {
     public void pickup() {
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
-            intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
             intake.command().openClaw();
         }, Schedule.RUN_INSTANTLY);
+
+        Schedule.addTask(() -> {
+            intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
+        }, Constants.PICKUP_DELAY_FOR_MOVE_DOWN);
 
         Schedule.addTask(() -> {
             intake.command().closeClaw();
@@ -144,6 +172,7 @@ public class Commands {
             intake.state = IntakeState.PICKED_UP;
 
             intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
             intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
         }, Constants.PICKUP_DELAY_FOR_MOVE_UP);
     }
@@ -179,21 +208,18 @@ public class Commands {
             intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
             intake.linearSlideMotor.activatePID();
         }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTask(() -> {
-            intake.current_orientation =
-                    (Constants.WRIST_ORIENTATION_TRANSFER_POSITION
-                            - Constants.WRIST_ORIENTATION_LEFT_LIMIT)
-                            / (Constants.WRIST_ORIENTATION_RIGHT_LIMIT
-                            - Constants.WRIST_ORIENTATION_LEFT_LIMIT);
-            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
-        }, Schedule.RUN_INSTANTLY);
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION);
         }, Schedule.RUN_INSTANTLY);
         Schedule.addTask(() -> {
+            intake.armUpDownServo.setPosition(Constants.ARM_PRE_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
             intake.current_x = 0.0;
             intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.command().rotateOrientation(90);
         }, Schedule.RUN_INSTANTLY);
     }
 
@@ -225,19 +251,34 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
     }
 
-    public void movePositionXY(double x, double y) {
-        TelemetrySystem.addClassData("Intake", "X", x);
-        TelemetrySystem.addClassData("Intake", "Y", y);
+    public void drop() {
+        intake.state = IntakeState.DROP_SAMPLE;
 
+        Schedule.addTask(() -> {
+            intake.wristUpDownServo.setPosition(Constants.WRIST_DROP_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+
+        Schedule.addTask(() -> {
+            intake.turretServo.setPosition(Constants.TURRET_DROP_POSITION);
+        }, Constants.DROP_DELAY_FOR_MOVE_RIGHT);
+
+        Schedule.addTask(() -> {
+            intake.state = IntakeState.REST;
+            intake.command().openClaw();
+        }, Constants.DROP_DELAY_FOR_OPEN_CLAW);
+
+        Schedule.addTask(() -> {
+            intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+            intake.command().ready();
+        }, Constants.DROP_DELAY_FOR_READY);
+    }
+
+    public void movePositionXY(double x, double y) {
         if(x > Constants.ARM_LENGTH) x = Constants.ARM_LENGTH;
         else if (x < -Constants.ARM_LENGTH) x = -Constants.ARM_LENGTH;
 
         double theta = Math.asin(x / Constants.ARM_LENGTH) + Constants.TURRET_RANGE / 2.0;
         double turretPosition = theta / Constants.TURRET_RANGE;
-        double targetLinearLength =
-                y - Constants.ARM_LENGTH * Math.cos(theta - Constants.TURRET_RANGE / 2.0);
-        double linearMotorPosition =
-                targetLinearLength / Constants.LINEAR_SLIDE_MAX_LENGTH * Constants.LINEAR_SLIDE_RANGE;
 
         // Constraints
         if (turretPosition < Constants.TURRET_LEFT_LIMIT) {
@@ -247,6 +288,13 @@ public class Commands {
             turretPosition = Constants.TURRET_RIGHT_LIMIT;
             theta = Constants.TURRET_RIGHT_LIMIT * Constants.TURRET_RANGE;
         }
+
+        double targetLinearLength =
+                y - Constants.ARM_LENGTH * Math.cos(theta - Constants.TURRET_RANGE / 2.0);
+        double linearMotorPosition =
+                targetLinearLength / Constants.LINEAR_SLIDE_MAX_LENGTH * Constants.LINEAR_SLIDE_RANGE;
+
+        // Constraints
         if (linearMotorPosition < 0) {
             linearMotorPosition = 0;
             targetLinearLength = 0;
@@ -268,20 +316,20 @@ public class Commands {
     }
 
     public void movePositiondXdY(double dX, double dY) {
-        intake.current_x += dX * 0.5;
-        intake.current_y += dY * 0.5;
+        intake.current_x += dX;
+        intake.current_y += dY;
         movePositionXY(intake.current_x, intake.current_y);
     }
 
     public void rotateOrientation(double orientation) {
-        TelemetrySystem.addClassData("Intake", "Angle", orientation);
-
         double turretTheta = intake.turretServo.getPosition() * Constants.TURRET_RANGE_IN_DEGREE
                 - Constants.TURRET_RANGE_IN_DEGREE / 2.0;
 
-        orientation = -orientation;
+        while (orientation > 180.0) orientation -= 180;
+        while (orientation < 0.0) orientation += 180;
+        intake.current_orientation = orientation;
+
         double angle = orientation - turretTheta;
-        angle += 90;
         while (angle > 180.0) angle -= 180;
         while (angle < 0.0) angle += 180;
 
@@ -305,7 +353,6 @@ public class Commands {
 
     public void rotateDeltaOrientation(double deltaOrientation) {
         intake.current_orientation += deltaOrientation;
-        // TODO : Limit the orientation to the range
         rotateOrientation(intake.current_orientation);
     }
 }
