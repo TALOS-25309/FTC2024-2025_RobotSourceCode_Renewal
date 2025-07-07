@@ -17,16 +17,21 @@ public class Vision {
     private double detectionCnt = 0.0;
 
     public enum State {
-        READY, REQUESTED, DETECTED, FAILED
+        READY, REQUESTED, DETECTED, FAILED, CAPTURED
     }
 
     private enum InnerState {
-        WAITING_FOR_DETECTION, WAITING_FOR_OBTAINING_ORIENTATION, COMPLETED
+        WAITING_FOR_DETECTION,
+        WAITING_FOR_OBTAINING_ORIENTATION,
+        WAITING_FOR_CAPTURING,
+        WAITING_FOR_CHECKING_DIFFERENCE,
+        COMPLETED
     }
 
     private State state = State.READY;
     private InnerState innerState = InnerState.COMPLETED;
     private Sample sample = null;
+    private boolean isDifferent = false;
 
     public Vision(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, VisionConstants.LIMELIGHT_NAME);
@@ -90,8 +95,8 @@ public class Vision {
                                 }
 
                                 innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
-                                limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
                                 setInputForObtainingOrientation();
+                                limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
                             } else {
                                 state = State.FAILED;
                                 innerState = InnerState.COMPLETED;
@@ -110,6 +115,19 @@ public class Vision {
                         state = State.FAILED;
                     }
                     innerState = InnerState.COMPLETED;
+                }
+            } else if (innerState == InnerState.WAITING_FOR_CAPTURING) {
+                if (result.getPipelineIndex() == VisionConstants.DIFFERENCE_PIPELINE_ID
+                    && result.getPythonOutput()[0] == VisionConstants.CAPTURE_CODE) {
+                    innerState = InnerState.COMPLETED;
+                    state = State.CAPTURED;
+                }
+            } else if (innerState == InnerState.WAITING_FOR_CHECKING_DIFFERENCE) {
+                if (result.getPipelineIndex() == VisionConstants.DIFFERENCE_PIPELINE_ID
+                    && result.getPythonOutput()[0] == VisionConstants.DIFFERENCE_CHECKING_CODE) {
+                    innerState = InnerState.COMPLETED;
+                    state = State.CAPTURED;
+                    isDifferent = result.getPythonOutput()[1] > VisionConstants.DIFF_THRESHOLD;
                 }
             }
         }
@@ -245,5 +263,29 @@ public class Vision {
             }
         }
         return sample;
+    }
+
+    public void capture() {
+        if (state == State.READY) {
+            state = State.REQUESTED;
+            innerState = InnerState.WAITING_FOR_CAPTURING;
+            limelight.pipelineSwitch(VisionConstants.DIFFERENCE_PIPELINE_ID);
+            double[] inputs = {VisionConstants.CAPTURE_CODE, 0,0,0,0,0,0,0};
+            limelight.updatePythonInputs(inputs);
+        }
+    }
+
+    public void checkDifference() {
+        if (state == State.READY) {
+            state = State.REQUESTED;
+            innerState = InnerState.WAITING_FOR_CHECKING_DIFFERENCE;
+            limelight.pipelineSwitch(VisionConstants.DIFFERENCE_PIPELINE_ID);
+            double[] inputs = {VisionConstants.DIFFERENCE_CHECKING_CODE, 0,0,0,0,0,0,0};
+            limelight.updatePythonInputs(inputs);
+        }
+    }
+
+    public boolean isDifferent() {
+        return isDifferent;
     }
 }

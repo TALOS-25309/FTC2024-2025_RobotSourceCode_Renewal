@@ -59,7 +59,8 @@ class Constants {
 
     public static double PICKUP_DELAY_FOR_MOVE_DOWN = 0.1;
     public static double PICKUP_DELAY_FOR_CLOSE_CLAW = 0.3;
-    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.6;
+    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.7;
+    public static double PICKUP_DELAY_FOR_CHECKING_DIFFERENCE = 1.0;
 
     public static double TRANSFER_DELAY_FOR_OPEN_CLAW = 1.0;
     public static double TRANSFER_DELAY_FOR_READY = 1.5;

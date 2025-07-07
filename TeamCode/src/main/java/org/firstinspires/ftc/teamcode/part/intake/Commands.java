@@ -155,26 +155,43 @@ public class Commands {
      * State will be set to {@link IntakeState#PICKED_UP}.
      */
     public void pickup() {
-        Schedule.addTask(() -> {
-            intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
-            intake.command().openClaw();
-        }, Schedule.RUN_INSTANTLY);
+        intake.vision.capture();
 
-        Schedule.addTask(() -> {
-            intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_MOVE_DOWN);
+        Schedule.addConditionalTask(() -> {
+            Schedule.addTask(() -> {
+                intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
+                intake.command().openClaw();
+            }, Schedule.RUN_INSTANTLY);
 
-        Schedule.addTask(() -> {
-            intake.command().closeClaw();
-        }, Constants.PICKUP_DELAY_FOR_CLOSE_CLAW);
+            Schedule.addTask(() -> {
+                intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
+            }, Constants.PICKUP_DELAY_FOR_MOVE_DOWN);
 
-        Schedule.addTask(() -> {
-            intake.state = IntakeState.PICKED_UP;
+            Schedule.addTask(() -> {
+                intake.command().closeClaw();
+            }, Constants.PICKUP_DELAY_FOR_CLOSE_CLAW);
 
-            intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
-            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
-            intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_MOVE_UP);
+            Schedule.addTask(() -> {
+                intake.state = IntakeState.PICKED_UP;
+
+                intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+                intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+                intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
+            }, Constants.PICKUP_DELAY_FOR_MOVE_UP);
+
+            Schedule.addTask(() -> {
+                intake.vision.checkDifference();
+
+                Schedule.addConditionalTask(() -> {
+                    if (intake.vision.isDifferent()) {
+                        intake.command().readyForTransfer();
+                    } else {
+                        intake.command().discard();
+                    }
+                }, Schedule.RUN_INSTANTLY, () -> intake.vision.currentState() == Vision.State.CAPTURED);
+
+            }, Constants.PICKUP_DELAY_FOR_CHECKING_DIFFERENCE);
+        }, Schedule.RUN_INSTANTLY, () -> intake.vision.currentState() == Vision.State.CAPTURED);
     }
 
     /**
