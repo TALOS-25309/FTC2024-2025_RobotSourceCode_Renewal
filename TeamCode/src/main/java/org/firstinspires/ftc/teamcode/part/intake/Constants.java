@@ -19,7 +19,7 @@ class Constants {
     // Intake system measurements (in cm, degree)
     public static final double LINEAR_SLIDE_MAX_LENGTH = 52.8; // Maximum length of the linear slide in cm
     public static double ARM_LENGTH = 13.5; // Length of the arm in cm
-    public static double TURRET_RANGE_IN_DEGREE = 124.0; // Range of the turret in degrees
+    public static double TURRET_RANGE_IN_DEGREE = 108.0; // Range of the turret in degrees
 
     static final double TURRET_RANGE = Math.toRadians(TURRET_RANGE_IN_DEGREE); // DO NOT CHANGE
 
@@ -33,13 +33,13 @@ class Constants {
     public static double LINEAR_SLIDE_STABLE_POWER = -0.1;
 
     // Positions of the servos
-    public static double CLAW_OPEN_POSITION = 0.7;
-    public static double CLAW_CLOSED_POSITION = 0.46;
-    public static double CLAW_CLOSED_MAXIMUM_POSITION = 0.46;
+    public static double CLAW_OPEN_POSITION = 0.4;
+    public static double CLAW_CLOSED_POSITION = 0.535;
+    public static double CLAW_CLOSED_MAXIMUM_POSITION = 0.61;
 
-    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.155;
-    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.825;
-    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.49;
+    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.185;
+    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.855;
+    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.52;
 
     public static double WRIST_READY_POSITION = 0.34;
     public static double WRIST_PICKUP_POSITION = 0.16;
@@ -58,7 +58,7 @@ class Constants {
 
     // Analog input values
     public static final double ANALOG_INPUT_MAX = 3.3;
-    public static double ANALOG_INPUT_PICKUP_THRESHOLD = 2.0; // TODO
+    public static double ANALOG_INPUT_PICKUP_THRESHOLD = 1.45;
 
     // Delays
     public static double MIN_DETECTION_DELAY_FOR_PICKUP = 0.5;
@@ -66,12 +66,12 @@ class Constants {
     public static double COMPACT_READY_DELAY_FOR_STABILIZATION = 3.0;
 
     public static double PICKUP_DELAY_FOR_MOVE_DOWN = 0.1;
-    public static double PICKUP_DELAY_FOR_CLOSE_CLAW = 0.3;
-    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.4;
-    public static double PICKUP_DELAY_FOR_CHECKING_PICKUP = 0.6;
+    public static double PICKUP_DELAY_FOR_CLOSE_CLAW = 0.4;
+    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.6;
+    public static double PICKUP_DELAY_FOR_CHECKING_PICKUP = 0.8;
 
-    public static double TRANSFER_DELAY_FOR_OPEN_CLAW = 1.0;
-    public static double TRANSFER_DELAY_FOR_READY = 1.5;
+    public static double TRANSFER_DELAY_FOR_OPEN_CLAW = 0.6;
+    public static double TRANSFER_DELAY_FOR_READY = 1.0;
 
     public static double DETECTION_DELAY = 0.1;
 

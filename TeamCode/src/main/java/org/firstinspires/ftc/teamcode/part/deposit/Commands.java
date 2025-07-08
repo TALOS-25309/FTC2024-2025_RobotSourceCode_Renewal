@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.part.deposit;
 
 import org.firstinspires.ftc.teamcode.features.Schedule;
+import org.firstinspires.ftc.teamcode.part.intake.IntakeState;
 
 public class Commands {
     private final Deposit deposit;
@@ -16,6 +17,24 @@ public class Commands {
     public void openClaw() {
         Schedule.addTask(() -> {
             deposit.clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+    }
+
+    /**
+     * Set the intake to the ready state.
+     * This will open the claw and set the wrist and arm to the ready position.
+     * State will be set to {@link IntakeState#READY_TO_PICKUP}.
+     */
+    public void rest() {
+        deposit.state = DepositState.REST;
+        Schedule.addTask(() -> {
+            deposit.command().openClaw();
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
         }, Schedule.RUN_INSTANTLY);
     }
 
@@ -272,5 +291,18 @@ public class Commands {
         Schedule.addTask(() -> {
             deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
         }, Constants.SCORING_SPECIMEN_DELAY_FOR_GOTO_READY_POSITION);
+    }
+
+    public void ascendingReady() {
+        Schedule.addTask(() -> {
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_ASCENDING_READY_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+    }
+
+    public void ascend() {
+        deposit.state = DepositState.ASCENDING;
+        Schedule.addTask(() -> {
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_ASCENDING_CLIMBING_POSITION);
+        }, Schedule.RUN_INSTANTLY);
     }
 }

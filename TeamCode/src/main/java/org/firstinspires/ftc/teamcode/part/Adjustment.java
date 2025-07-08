@@ -20,7 +20,8 @@ public abstract class Adjustment {
     public enum State {
         ADJUST_SERVO,
         PRINTING_ENCODER_VALUE,
-        ADJUST_PID
+        PRINTING_ANALOG_INPUT_VALUE,
+        ADJUST_PID,
     }
 
     protected State adjustState = State.ADJUST_SERVO;
@@ -43,6 +44,9 @@ public abstract class Adjustment {
                 case ADJUST_PID:
                     adjustPID();
                     break;
+                case PRINTING_ANALOG_INPUT_VALUE:
+                    printAnalogInputValue();
+                    break;
             }
         }
     }
@@ -51,4 +55,5 @@ public abstract class Adjustment {
     protected abstract void adjustServo();
     protected abstract void adjustPID();
     protected abstract void printEncoderValue();
+    protected abstract void printAnalogInputValue();
 }

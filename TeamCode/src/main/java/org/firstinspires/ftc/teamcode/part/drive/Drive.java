@@ -41,6 +41,7 @@ public class Drive implements Part {
     @Override
     public void stop() {
         this.sampleMecanumDrive.breakFollowing();
+        this.command().stop();
     }
 
     public TrajectoryBuilder trajectoryBuilder() {
@@ -53,5 +54,9 @@ public class Drive implements Part {
 
     public Commands command() {
         return this.commandProcessor;
+    }
+
+    public SampleMecanumDrive drive() {
+        return this.sampleMecanumDrive;
     }
 }

@@ -98,4 +98,9 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 deposit.linearSlideMainMotor.getCurrentPosition()
         );
     }
+
+    @Override
+    protected void printAnalogInputValue() {
+
+    }
 }

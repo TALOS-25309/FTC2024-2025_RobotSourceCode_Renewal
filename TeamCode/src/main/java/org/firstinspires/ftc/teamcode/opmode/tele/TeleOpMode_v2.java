@@ -66,13 +66,21 @@ public class TeleOpMode_v2 extends OpMode {
 
         // Checking driver inputs
         checkEmergency();
-        if(!Global.IS_EMERGENCY) {
-            controlGamepad1(smartGamepad1);
-            controlGamepad2(smartGamepad2);
-        } else {
+        if(Global.IS_EMERGENCY) {
             for (Part part : part_list) {
                 part.stop();
             }
+        } else if(Global.ASCENDING) {
+            if(smartGamepad1.buttonPS().isPressed()) {
+                if (deposit.state() == DepositState.ASCENDING) {
+                    deposit.command().ascendingReady();
+                } else {
+                    deposit.command().ascend();
+                }
+            }
+        } else {
+            controlGamepad1(smartGamepad1);
+            controlGamepad2(smartGamepad2);
         }
 
         smartGamepad1.update();
@@ -95,6 +103,9 @@ public class TeleOpMode_v2 extends OpMode {
     }
 
     public void controlGamepad1(SmartGamepad gamepad) {
+        if(Global.ASCENDING)
+            return;
+
         // Controlling Drive Part
         drive.command().drive(
                 Math.pow(gamepad.triggerLeftStickX().getValue(), 3),
@@ -108,7 +119,7 @@ public class TeleOpMode_v2 extends OpMode {
                 || intake.state() == IntakeState.PICKED_UP) { // Manual Control (Only Linear)
             intake.command().movePositiondXdY(
                     0,
-                    -gamepad.triggerLeftStickY().getValue() * 2.0
+                    -gamepad.triggerRightStickY().getValue() * 1.3
             );
         }
         if (gamepad.buttonCircle().isPressed()) {
@@ -138,9 +149,19 @@ public class TeleOpMode_v2 extends OpMode {
         if (gamepad.buttonCross().isPressed()) { // Discard
             deposit.command().discard();
         }
+
+        // Controlling Ascending
+        if (gamepad.buttonPS().isPressed()) {
+            Global.ASCENDING = true;
+            resetParts();
+            deposit.command().ascendingReady();
+        }
     }
 
     public void controlGamepad2(SmartGamepad gamepad) {
+        if(Global.ASCENDING)
+            return;
+
         // Controlling Intake Part
         if (gamepad.buttonDPadUp().isPressed()) { // UP : Manual Pickup
             if (intake.state() == IntakeState.READY_TO_PICKUP){
@@ -153,11 +174,11 @@ public class TeleOpMode_v2 extends OpMode {
         }
         if (intake.state() == IntakeState.READY_TO_PICKUP) { // Manual Control
             intake.command().movePositiondXdY(
-                    smartGamepad1.triggerLeftStickX().getValue(),
-                    -smartGamepad1.triggerLeftStickY().getValue()
+                    gamepad.triggerLeftStickX().getValue(),
+                    -gamepad.triggerLeftStickY().getValue()
             );
-            int left = smartGamepad1.buttonLeftBumper().isHeld() ? 1 : 0;
-            int right = smartGamepad1.buttonRightBumper().isHeld() ? 1 : 0;
+            int left = gamepad.buttonLeftBumper().isHeld() ? 1 : 0;
+            int right = gamepad.buttonRightBumper().isHeld() ? 1 : 0;
             intake.command().rotateDeltaOrientation(right-left);
         }
 
@@ -189,17 +210,32 @@ public class TeleOpMode_v2 extends OpMode {
     }
 
     public void checkEmergency() {
-        if (smartGamepad1.buttonLeftBumper().isHeld()
-        && smartGamepad1.buttonRightBumper().isHeld()
-        && smartGamepad1.triggerLeftTrigger().isHeld()
-        && smartGamepad1.triggerRightTrigger().isHeld()) {
+        if ((smartGamepad1.buttonLeftBumper().isHeld()
+                && smartGamepad1.buttonRightBumper().isHeld()
+                && smartGamepad1.triggerLeftTrigger().isHeld()
+                && smartGamepad1.triggerRightTrigger().isHeld())
+            || (smartGamepad2.buttonLeftBumper().isHeld()
+                && smartGamepad2.buttonRightBumper().isHeld()
+                && smartGamepad2.triggerLeftTrigger().isHeld()
+                && smartGamepad2.triggerRightTrigger().isHeld())) {
+            if(!Global.IS_EMERGENCY) {
+                smartGamepad1.rumble(0.5);
+                smartGamepad2.rumble(0.5);
+            }
             Global.IS_EMERGENCY = true;
-            smartGamepad1.rumble(0.5);
-            smartGamepad2.rumble(0.5);
-        } else if (smartGamepad1.buttonA().isPressed()) {
+        } else {
+            if(Global.IS_EMERGENCY) {
+                resetParts();
+                smartGamepad1.rumble(0.1);
+                smartGamepad2.rumble(0.1);
+            }
             Global.IS_EMERGENCY = false;
-            smartGamepad1.rumble(0.1);
-            smartGamepad2.rumble(0.1);
         }
+    }
+
+    public void resetParts(){
+        intake.command().compactReady();
+        deposit.command().rest();
+        drive.command().stop();
     }
 }

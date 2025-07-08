@@ -27,13 +27,17 @@ public class Commands {
         );
     }
 
+    public void stop() {
+        drive.sampleMecanumDrive.setWeightedDrivePower(new Pose2d(0, 0, 0));
+    }
+
     /**
      * Follow the given trajectory sequence with RoadRunner.
      *
      * @param trajectory
      */
     public void followTrajectory(TrajectorySequence trajectory) {
-        drive.sampleMecanumDrive.followTrajectorySequence(trajectory);
+        drive.sampleMecanumDrive.followTrajectorySequenceAsync(trajectory);
     }
 
     /**

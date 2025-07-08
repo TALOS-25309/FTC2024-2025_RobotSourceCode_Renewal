@@ -20,12 +20,12 @@ class Constants {
     public static final Boolean WHEEL_REVERSE_RIGHT_REAR = false;
 
     public static final String ODOMETRY_NAME_LEFT = "leftFront";
-    public static final String ODOMETRY_NAME_RIGHT = "leftBack";
+    public static final String ODOMETRY_NAME_RIGHT = "rightBack";
     public static final String ODOMETRY_NAME_FRONT = "rightFront";
 
     public static final Boolean ODOMETRY_REVERSE_LEFT = false;
     public static final Boolean ODOMETRY_REVERSE_RIGHT = true;
-    public static final Boolean ODOMETRY_REVERSE_FRONT = false;
+    public static final Boolean ODOMETRY_REVERSE_FRONT = true;
 
     // Motor Speed
     public static double MOTOR_SPEED = 1.0;

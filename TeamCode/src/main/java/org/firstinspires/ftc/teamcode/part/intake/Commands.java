@@ -214,9 +214,6 @@ public class Commands {
             intake.linearSlideMotor.activatePID();
             intake.command().ready();
         }, Schedule.RUN_INSTANTLY);
-        Schedule.addTask(() -> {
-            intake.linearSlideMotor.setPower(Constants.LINEAR_SLIDE_STABLE_POWER);
-        }, Constants.COMPACT_READY_DELAY_FOR_STABILIZATION);
     }
 
     public void readyForTransfer() {

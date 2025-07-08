@@ -112,4 +112,13 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 intake.linearSlideMotor.getCurrentPosition()
         );
     }
+
+    @Override
+    protected void printAnalogInputValue() {
+        TelemetrySystem.addClassData(
+                "IntakeAdjustment",
+                "Analog Input Value",
+                intake.clawAnalogInput.getVoltage()
+        );
+    }
 }

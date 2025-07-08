@@ -8,4 +8,5 @@ public class Global {
     public static Alliance ALLIANCE = Alliance.RED;
     public static boolean IS_EMERGENCY = false;
     public static boolean DETECTING = false;
+    public static boolean ASCENDING = false;
 }

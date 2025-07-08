@@ -98,6 +98,11 @@ public class Intake implements Part {
     @Override
     public void stop() {
         linearSlideMotor.setPower(0);
+        wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+        wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+        armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
+        turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+        clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
     }
 
     public Commands command() {

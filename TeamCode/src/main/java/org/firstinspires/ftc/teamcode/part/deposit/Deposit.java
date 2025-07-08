@@ -90,6 +90,8 @@ public class Deposit implements Part {
     @Override
     public void stop() {
         linearSlideMainMotor.setPower(0);
+        armMainServo.setPosition(Constants.ARM_READY_POSITION);
+        clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
     }
 
     public Commands command() {
