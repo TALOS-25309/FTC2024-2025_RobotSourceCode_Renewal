@@ -94,15 +94,9 @@ public class Commands {
             deposit.command().closeClaw();
         }, Schedule.RUN_INSTANTLY);
 
-        deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
-
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_MOVE_UP_LINEAR_SLIDE);
-
-        Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-        }, Constants.PICKUP_DELAY_FOR_GOTO_SPECIMEN_SCORING_POSITION);
+            deposit.command().poseForHighSpecimenScoringForward();
+        }, Constants.PICKUP_DELAY_FOR_GOTO_SPECIMEN_SCORING_POSE);
     }
 
     /**
@@ -115,10 +109,6 @@ public class Commands {
         Schedule.addTask(() -> {
             deposit.armMainServo.setPosition(Constants.ARM_DISCARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
-
-        Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
-        }, Schedule.RUN_INSTANTLY);
     }
 
     /**
@@ -126,13 +116,16 @@ public class Commands {
      * This method changes the deposit state to {@link DepositState#READY_TO_DISCARD}.
      */
     public void discard() {
-        deposit.state = DepositState.REST;
-
         Schedule.addTask(() -> {
-            deposit.command().openClaw();
+            deposit.command().poseForDiscard();
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
+            deposit.command().openClaw();
+        }, Constants.DISCARD_DELAY_FOR_OPEN_CLAW);
+
+        Schedule.addTask(() -> {
+            deposit.state = DepositState.REST;
             deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
         }, Constants.DISCARD_DELAY_FOR_GOTO_READY_POSITION);
 
@@ -146,15 +139,17 @@ public class Commands {
      * This method changes the deposit state to {@link DepositState#READY_TO_DEPOSIT_BASKET}.
      */
     public void poseForLowBasketScoring() {
-        deposit.state = DepositState.READY_TO_DEPOSIT_BASKET;
+        Schedule.addConditionalTask(() -> {
+            deposit.state = DepositState.READY_TO_DEPOSIT_BASKET;
 
-        Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            Schedule.addTask(() -> {
+                deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
+            }, Schedule.RUN_INSTANTLY);
 
-        Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_BASKET_SCORING_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            Schedule.addTask(() -> {
+                deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_BASKET_SCORING_POSITION);
+            }, Schedule.RUN_INSTANTLY);
+        }, Schedule.RUN_INSTANTLY, () -> deposit.state == DepositState.LOAD_SAMPLE);
     }
 
     /**
@@ -162,15 +157,17 @@ public class Commands {
      * This method changes the deposit state to {@link DepositState#READY_TO_DEPOSIT_BASKET}.
      */
     public void poseForHighBasketScoring() {
-        deposit.state = DepositState.READY_TO_DEPOSIT_BASKET;
+        Schedule.addConditionalTask(() -> {
+            deposit.state = DepositState.READY_TO_DEPOSIT_BASKET;
 
-        Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            Schedule.addTask(() -> {
+                deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
+            }, Schedule.RUN_INSTANTLY);
 
-        Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_BASKET_SCORING_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            Schedule.addTask(() -> {
+                deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_BASKET_SCORING_POSITION);
+            }, Schedule.RUN_INSTANTLY);
+        }, Schedule.RUN_INSTANTLY, () -> deposit.state == DepositState.LOAD_SAMPLE);
     }
 
     /**
@@ -201,12 +198,12 @@ public class Commands {
         deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
 
         Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**
@@ -217,12 +214,12 @@ public class Commands {
         deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
 
         Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**
@@ -233,12 +230,12 @@ public class Commands {
         deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
 
         Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
+        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**
@@ -249,12 +246,12 @@ public class Commands {
         deposit.state = DepositState.READY_TO_DEPOSIT_SPECIMEN;
 
         Schedule.addTask(() -> {
-            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION);
-        }, Schedule.RUN_INSTANTLY);
+            deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
+        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**

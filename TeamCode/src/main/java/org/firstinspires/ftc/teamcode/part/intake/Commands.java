@@ -35,6 +35,12 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
     }
 
+    public void closeClawMaximum() {
+        Schedule.addTask(() -> {
+            intake.clawServo.setPosition(Constants.CLAW_CLOSED_MAXIMUM_POSITION);
+        }, Schedule.RUN_INSTANTLY);
+    }
+
     /**
      * Set the intake to the ready state.
      * This will open the claw and set the wrist and arm to the ready position.
@@ -82,13 +88,12 @@ public class Commands {
         Schedule.addTask(() -> {
             intake.vision.request(color);
         }, Constants.DETECTION_DELAY);
+
         Schedule.addConditionalTask(() -> {
             intake.state = IntakeState.READY_TO_PICKUP;
             Sample sample = intake.vision.getTargetData();
-
             Global.DETECTING = false;
-
-            TelemetrySystem.addClassData("Intake", "State", sample.state().toString());
+            TelemetrySystem.addClassData("Intake", "Sample State", sample.state().toString());
             if (sample.state() == Sample.State.DETECTED) {
                 double x = sample.getX();
                 double y = sample.getY();
@@ -117,7 +122,7 @@ public class Commands {
 
                 Schedule.addTask(() -> {
                     intake.command().pickup();
-                }, Constants.AUTO_PICKUP_DELAY_FOR_PICK_UP);
+                }, Constants.MIN_DETECTION_DELAY_FOR_PICKUP);
             }
         }, Constants.DETECTION_DELAY, () -> intake.vision.currentState() != Vision.State.REQUESTED);
     }
@@ -155,43 +160,36 @@ public class Commands {
      * State will be set to {@link IntakeState#PICKED_UP}.
      */
     public void pickup() {
-        intake.vision.capture();
+        Schedule.addTask(() -> {
+            intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
+            intake.command().openClaw();
+        }, Schedule.RUN_INSTANTLY);
 
-        Schedule.addConditionalTask(() -> {
-            Schedule.addTask(() -> {
-                intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
-                intake.command().openClaw();
-            }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
+        }, Constants.PICKUP_DELAY_FOR_MOVE_DOWN);
 
-            Schedule.addTask(() -> {
-                intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
-            }, Constants.PICKUP_DELAY_FOR_MOVE_DOWN);
+        Schedule.addTask(() -> {
+            intake.command().closeClaw();
+        }, Constants.PICKUP_DELAY_FOR_CLOSE_CLAW);
 
-            Schedule.addTask(() -> {
+        Schedule.addTask(() -> {
+            intake.state = IntakeState.PICKED_UP;
+
+            intake.command().closeClawMaximum();
+            intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
+            intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
+        }, Constants.PICKUP_DELAY_FOR_MOVE_UP);
+
+        Schedule.addTask(() -> {
+            if (intake.clawAnalogInput.getVoltage() > Constants.ANALOG_INPUT_PICKUP_THRESHOLD) {
                 intake.command().closeClaw();
-            }, Constants.PICKUP_DELAY_FOR_CLOSE_CLAW);
-
-            Schedule.addTask(() -> {
-                intake.state = IntakeState.PICKED_UP;
-
-                intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
-                intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
-                intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
-            }, Constants.PICKUP_DELAY_FOR_MOVE_UP);
-
-            Schedule.addTask(() -> {
-                intake.vision.checkDifference();
-
-                Schedule.addConditionalTask(() -> {
-                    if (intake.vision.isDifferent()) {
-                        intake.command().readyForTransfer();
-                    } else {
-                        intake.command().discard();
-                    }
-                }, Schedule.RUN_INSTANTLY, () -> intake.vision.currentState() == Vision.State.CAPTURED);
-
-            }, Constants.PICKUP_DELAY_FOR_CHECKING_DIFFERENCE);
-        }, Schedule.RUN_INSTANTLY, () -> intake.vision.currentState() == Vision.State.CAPTURED);
+                intake.command().readyForTransfer();
+            } else {
+                intake.command().discard();
+            }
+        }, Constants.PICKUP_DELAY_FOR_CHECKING_PICKUP);
     }
 
     /**
@@ -216,6 +214,9 @@ public class Commands {
             intake.linearSlideMotor.activatePID();
             intake.command().ready();
         }, Schedule.RUN_INSTANTLY);
+        Schedule.addTask(() -> {
+            intake.linearSlideMotor.setPower(Constants.LINEAR_SLIDE_STABLE_POWER);
+        }, Constants.COMPACT_READY_DELAY_FOR_STABILIZATION);
     }
 
     public void readyForTransfer() {

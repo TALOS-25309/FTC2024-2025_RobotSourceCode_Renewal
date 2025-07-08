@@ -39,8 +39,8 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     private List<Integer> lastEncPositions, lastEncVels;
 
     /* StandardTrackingWheelLocalizer.java 파일의 약 37~38줄 */
-    public static double X_MULTIPLIER = 0.995629; // X 방향 보정 계수
-    public static double Y_MULTIPLIER = 1.177473; //1.003975; // Y 방향 보정 계수
+    public static double X_MULTIPLIER = 0.996; // X 방향 보정 계수
+    public static double Y_MULTIPLIER = 1.009; //1.003975; // Y 방향 보정 계수
 
 
 

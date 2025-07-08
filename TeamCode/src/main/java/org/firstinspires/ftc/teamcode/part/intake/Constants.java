@@ -8,6 +8,7 @@ class Constants {
 
     // Hardware Setting
     public static final String CLAW_SERVO_NAME = "IntakeClaw";
+    public static final String CLAW_ANALOG_INPUT_NAME = "IntakeClawEncoder";
     public static final String WRIST_ORIENTATION_SERVO_NAME = "IntakeAngle";
     public static final String WRIST_UP_DOWN_SERVO_NAME = "IntakeWrist";
     public static final String ARM_UP_DOWN_SERVO_NAME = "IntakeArm";
@@ -34,6 +35,7 @@ class Constants {
     // Positions of the servos
     public static double CLAW_OPEN_POSITION = 0.7;
     public static double CLAW_CLOSED_POSITION = 0.46;
+    public static double CLAW_CLOSED_MAXIMUM_POSITION = 0.46;
 
     public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.155;
     public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.825;
@@ -54,18 +56,24 @@ class Constants {
     public static double TURRET_TRANSFER_POSITION = 0.51;
     public static double TURRET_DROP_POSITION = 1.0;
 
+    // Analog input values
+    public static final double ANALOG_INPUT_MAX = 3.3;
+    public static double ANALOG_INPUT_PICKUP_THRESHOLD = 2.0; // TODO
+
     // Delays
-    public static double AUTO_PICKUP_DELAY_FOR_PICK_UP = 0.5;
+    public static double MIN_DETECTION_DELAY_FOR_PICKUP = 0.5;
+
+    public static double COMPACT_READY_DELAY_FOR_STABILIZATION = 3.0;
 
     public static double PICKUP_DELAY_FOR_MOVE_DOWN = 0.1;
     public static double PICKUP_DELAY_FOR_CLOSE_CLAW = 0.3;
-    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.7;
-    public static double PICKUP_DELAY_FOR_CHECKING_DIFFERENCE = 1.0;
+    public static double PICKUP_DELAY_FOR_MOVE_UP = 0.4;
+    public static double PICKUP_DELAY_FOR_CHECKING_PICKUP = 0.6;
 
     public static double TRANSFER_DELAY_FOR_OPEN_CLAW = 1.0;
     public static double TRANSFER_DELAY_FOR_READY = 1.5;
 
-    public static double DETECTION_DELAY = 0.5;
+    public static double DETECTION_DELAY = 0.1;
 
     public static double DROP_DELAY_FOR_MOVE_RIGHT = 0.1;
     public static double DROP_DELAY_FOR_OPEN_CLAW = 0.3;

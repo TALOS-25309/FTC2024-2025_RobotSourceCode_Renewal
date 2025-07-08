@@ -6,6 +6,8 @@ import com.acmerobotics.dashboard.config.Config;
 public class VisionConstants {
     private VisionConstants() {} // Prevent instantiation
 
+    public static final boolean VISION_BASES_SAMPLE_PICKUP_CHECK = false;
+
     // Limelight settings
     public static final String LIMELIGHT_NAME = "limelight";
     public static final double LIMELIGHT_HEIGHT = 16.5 - 1.9; // Height of the limelight in cm
@@ -21,12 +23,12 @@ public class VisionConstants {
     public static final int DIFFERENCE_PIPELINE_ID = 2; // Pipeline ID for color detection and obtaining orientation
     public static final int POLL_RATE_HZ = 100; // Polling rate in Hz
 
-    public static final float CAPTURE_CODE = 0.1f;
-    public static final float DIFFERENCE_CHECKING_CODE = -0.1f;
+    public static final double CAPTURE_CODE = 1.0;
+    public static final double DIFFERENCE_CHECKING_CODE = -1.0;
 
     public static int AREA_MARGIN = 3;
 
     public static int REPETITION = 3;
 
-    public static int DIFF_THRESHOLD = 15000;
+    public static int DIFF_THRESHOLD = 200;
 }

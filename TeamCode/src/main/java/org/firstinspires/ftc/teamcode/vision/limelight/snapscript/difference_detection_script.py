@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 
 last_img = None
+saved_change = -1
 
 test = 0
 test_screen = None
 
 def runPipeline(img, llrobot):
-    global last_img
+    global last_img, saved_change
     global test, test_screen
 
     llpython = [0,0,0,0,0,0,0,0]
@@ -21,7 +22,7 @@ def runPipeline(img, llrobot):
 
     org_img = img
 
-    threshold = 50
+    threshold = 150
     left_ratio = 0.1
     right_ratio = 0.1
     top_ratio = 0.7
@@ -32,8 +33,10 @@ def runPipeline(img, llrobot):
     x2 = int(w * (1 - right_ratio))
     y1 = int(h * top_ratio)
     y2 = int(h * (1 - bottom_ratio))
-    #img = img[y1:y2, x1:x2]
+    img = img[y1:y2, x1:x2]
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    target = img
 
     if last_img is None:
         last_img = img
@@ -44,16 +47,23 @@ def runPipeline(img, llrobot):
 
     print(count)
 
+    if llrobot[0] == 0.0:
+        last_img = img
+    elif llrobot[0] == -1.0:
+        last_img = None
+        if saved_change == -1:
+            saved_change = count
+    elif llrobot[0] == 1.0:
+        saved_change = -1
+    count = saved_change
+
     llpython[0] = llrobot[0]
     llpython[1] = count
 
-    if llrobot[0] == 0.0 or llrobot[0] == 1.0:
-        last_img = img
-
     # print target
-    img = diff
+    #target = diff
 
-    screen = center_image_on_black_bg(img)
+    screen = center_image_on_black_bg(target)
     screen = cv2.cvtColor(screen, cv2.COLOR_GRAY2BGR)
     test_screen = screen
     return np.array([[]]), screen, llpython

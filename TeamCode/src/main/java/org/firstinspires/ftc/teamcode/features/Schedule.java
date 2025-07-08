@@ -74,6 +74,7 @@ public class Schedule {
 
     public static void init() {
         tasks.clear();
+        conditionalTasks.clear();
     }
 
     public static void addTask(@NonNull Runnable task, double delay) {
@@ -85,10 +86,8 @@ public class Schedule {
     }
 
     public static void addConditionalTask(@NonNull Runnable task, double delay, BooleanSupplier condition) {
-        if (delay <= RUN_INSTANTLY) {
-            if (condition.getAsBoolean()) {
-                task.run();
-            }
+        if (delay <= RUN_INSTANTLY && condition.getAsBoolean()) {
+            task.run();
         } else {
             conditionalTasks.add(new ConditionalTask(task, System.nanoTime() + (long) (delay * 1e9), condition));
         }
@@ -121,6 +120,9 @@ public class Schedule {
                 iterator.remove();
             }
         }
+
+        TelemetrySystem.addDebugData("Tasks #", tasks.size());
+        TelemetrySystem.addDebugData("Conditional Tasks #", conditionalTasks.size());
     }
 
     public static void stop() {

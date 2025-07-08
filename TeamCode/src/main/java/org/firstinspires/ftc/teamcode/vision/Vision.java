@@ -17,7 +17,7 @@ public class Vision {
     private double detectionCnt = 0.0;
 
     public enum State {
-        READY, REQUESTED, DETECTED, FAILED, CAPTURED
+        READY, REQUESTED, DETECTED, FAILED
     }
 
     private enum InnerState {
@@ -40,6 +40,7 @@ public class Vision {
     }
 
     public void update() {
+        TelemetrySystem.addClassData("Vision", "state", state.toString());
         if (state == State.REQUESTED) {
             LLStatus status = limelight.getStatus();
 
@@ -117,16 +118,21 @@ public class Vision {
                     innerState = InnerState.COMPLETED;
                 }
             } else if (innerState == InnerState.WAITING_FOR_CAPTURING) {
+                if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
+                    throw new UnsupportedOperationException("This feature is no longer supported");
                 if (result.getPipelineIndex() == VisionConstants.DIFFERENCE_PIPELINE_ID
                     && result.getPythonOutput()[0] == VisionConstants.CAPTURE_CODE) {
                     innerState = InnerState.COMPLETED;
-                    state = State.CAPTURED;
+                    state = State.READY;
                 }
             } else if (innerState == InnerState.WAITING_FOR_CHECKING_DIFFERENCE) {
+                if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
+                    throw new UnsupportedOperationException("This feature is no longer supported");
                 if (result.getPipelineIndex() == VisionConstants.DIFFERENCE_PIPELINE_ID
                     && result.getPythonOutput()[0] == VisionConstants.DIFFERENCE_CHECKING_CODE) {
                     innerState = InnerState.COMPLETED;
-                    state = State.CAPTURED;
+                    state = State.READY;
+                    TelemetrySystem.addClassData("Vision", "diff", result.getPythonOutput()[1]);
                     isDifferent = result.getPythonOutput()[1] > VisionConstants.DIFF_THRESHOLD;
                 }
             }
@@ -266,6 +272,9 @@ public class Vision {
     }
 
     public void capture() {
+        if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
+            throw new UnsupportedOperationException("This feature is no longer supported");
+
         if (state == State.READY) {
             state = State.REQUESTED;
             innerState = InnerState.WAITING_FOR_CAPTURING;
@@ -276,16 +285,24 @@ public class Vision {
     }
 
     public void checkDifference() {
+        if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
+            throw new UnsupportedOperationException("This feature is no longer supported");
+
+        if (limelight.getStatus().getPipelineIndex() != VisionConstants.DIFFERENCE_PIPELINE_ID) {
+            return;
+        }
         if (state == State.READY) {
             state = State.REQUESTED;
             innerState = InnerState.WAITING_FOR_CHECKING_DIFFERENCE;
-            limelight.pipelineSwitch(VisionConstants.DIFFERENCE_PIPELINE_ID);
             double[] inputs = {VisionConstants.DIFFERENCE_CHECKING_CODE, 0,0,0,0,0,0,0};
             limelight.updatePythonInputs(inputs);
         }
     }
 
     public boolean isDifferent() {
+        if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
+            throw new UnsupportedOperationException("This feature is no longer supported");
+
         return isDifferent;
     }
 }

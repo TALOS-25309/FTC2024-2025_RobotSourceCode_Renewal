@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.part.intake;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -23,6 +24,8 @@ public class Intake implements Part {
     SmartServo turretServo;
 
     SmartMotor linearSlideMotor;
+
+    AnalogInput clawAnalogInput;
 
     Vision vision;
 
@@ -60,6 +63,7 @@ public class Intake implements Part {
                 hardwareMap.get(DcMotor.class, Constants.LINEAR_SLIDE_ENCODER_NAME),
                 Constants.LINEAR_SLIDE_MOTOR_NAME
         );
+        clawAnalogInput = hardwareMap.get(AnalogInput.class, Constants.CLAW_ANALOG_INPUT_NAME);
 
         // Set initial positions
         clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
