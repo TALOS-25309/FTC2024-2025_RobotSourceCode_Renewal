@@ -40,7 +40,7 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
                 break;
             case TRANSFER:
-                deposit.armMainServo.setPosition(Constants.ARM_TRANSFER_POSITION);
+                deposit.armMainServo.setPosition(Constants.ARM_TRANSFER_POSITION());
                 break;
             case SPECIMEN_PICKUP:
                 deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_PICKUP_POSITION);
@@ -58,7 +58,7 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 deposit.clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
                 break;
             case CLOSE_CLAW:
-                deposit.clawServo.setPosition(Constants.CLAW_CLOSED_POSITION);
+                deposit.clawServo.setPosition(Constants.CLAW_CLOSED_POSITION());
                 break;
         }
     }

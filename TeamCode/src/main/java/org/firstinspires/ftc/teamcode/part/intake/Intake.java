@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.vision.Vision;
 public class Intake implements Part {
     Commands commandProcessor;
     Adjustment adjustmentProcessor;
-    IntakeState state = IntakeState.READY_TO_PICKUP;
+    IntakeState state = IntakeState.READY_FOR_PICKUP;
 
     SmartServo clawServo;
     SmartServo wristOrientationServo;
@@ -90,14 +90,18 @@ public class Intake implements Part {
         adjustmentProcessor.update();
         vision.update();
 
+        /*
+        if (linearSlideMotor.getCurrentPosition() < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD) {
+            linearSlideMotor.setPower(Constants.LINEAR_SLIDE_STABLE_POWER);
+        }
+        */
+        TelemetrySystem.addClassData("Intake", "state", this.state.toString());
         TelemetrySystem.addClassData("Intake", "X", this.current_x);
         TelemetrySystem.addClassData("Intake", "Y", this.current_y);
-        TelemetrySystem.addClassData("Intake", "Omega", this.current_orientation);
     }
 
     @Override
     public void stop() {
-        linearSlideMotor.setPower(0);
         wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
         wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
         armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
@@ -115,5 +119,9 @@ public class Intake implements Part {
 
     public IntakeState state() {
         return state;
+    }
+
+    public boolean isLinearSlideInside() {
+        return linearSlideMotor.getCurrentPosition() < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
     }
 }

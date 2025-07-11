@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmode.auto.specimen;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.features.Schedule;
-import org.firstinspires.ftc.teamcode.features.SmartGamepad;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
@@ -17,8 +15,9 @@ import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
 
+@Config(value = "Auto-Specimen")
 @Autonomous(group = "Automatic", preselectTeleOp="TeleOpMode")
-public class AutoOpMode extends OpMode {
+public class SpecimenAutoTestOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;
 
@@ -28,7 +27,15 @@ public class AutoOpMode extends OpMode {
 
     private SpecimenStrategy strategy;
 
-    private boolean alreadyPushedSamples = false;
+    public enum Strategy {
+        SCORE_SPECIMEN_AND_PICKUP_SAMPLE,
+        DETECT_SAMPLE_AND_PICKUP,
+        GET_SPECIMEN,
+        MOVE_SAMPLES,
+    }
+
+    public static Strategy currentStrategy = Strategy.SCORE_SPECIMEN_AND_PICKUP_SAMPLE;
+    public static boolean run = false;
 
     @Override
     public void init() {
@@ -47,43 +54,14 @@ public class AutoOpMode extends OpMode {
 
         strategy = new SpecimenStrategy(drive, intake, deposit);
 
-        SampleMecanumDrive.getVelocityConstraint(
-                Constants.SPECIMEN_VELOCITY,
-                DriveConstants.MAX_ANG_VEL,
-                DriveConstants.TRACK_WIDTH
-        );
-    }
-
-    public void procedure() {
-        Schedule.addTask(() -> {
-            // 1. Specimen을 걸고
-            strategy.scoreSpecimenAndPickupSample();
-            Schedule.addConditionalTask(() -> {
-                // 2. Sample Pickup을 시도
-                strategy.detectSampleAndPickUp();
-                Schedule.addConditionalTask(() -> {
-                    if(strategy.isPickupSuccessful || alreadyPushedSamples) {
-                        // 3. Specimen 가지러 가기
-                        strategy.getSpecimen();
-                    } else {
-                        // 4. Sample 3개 옮기기
-                        strategy.pushThreeSampleToObservationZone();
-                        alreadyPushedSamples = true;
-                    }
-                    Schedule.addConditionalTask(
-                            // 5. 반복
-                            this::procedure,
-                            Schedule.RUN_INSTANTLY,
-                            () -> !drive.isBusy()
-                    );
-                }, Schedule.RUN_INSTANTLY, () -> !strategy.isPickingUpSample);
-            }, Schedule.RUN_INSTANTLY, () -> !drive.isBusy());
-        }, Schedule.RUN_INSTANTLY);
+        TelemetrySystem.enableClass("Vision");
+        TelemetrySystem.enableClass("Drive");
+        TelemetrySystem.setDebugMode(true);
     }
 
     @Override
     public void start() {
-        procedure();
+
     }
 
     @Override
@@ -98,6 +76,24 @@ public class AutoOpMode extends OpMode {
 
         // Update telemetry
         TelemetrySystem.update();
+
+        if (run) {
+            switch (currentStrategy) {
+                case SCORE_SPECIMEN_AND_PICKUP_SAMPLE:
+                    strategy.scoreSpecimenAndPickupSample();
+                    break;
+                case DETECT_SAMPLE_AND_PICKUP:
+                    strategy.detectSampleAndPickUp();
+                    break;
+                case GET_SPECIMEN:
+                    strategy.getSpecimen();
+                    break;
+                case MOVE_SAMPLES:
+                    strategy.moveThreeSampleToObservationZone();
+                    break;
+            }
+            run = false; // Reset run flag after executing the strategy
+        }
     }
 
 }

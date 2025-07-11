@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.part.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class Commands {
@@ -18,6 +20,10 @@ public class Commands {
      * @param omega The rotational component of the drive power (turning).
      */
     public void drive(double x, double y, double omega) {
+        if (Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+            x = -x;
+            y = -y;
+        }
         drive.sampleMecanumDrive.setWeightedDrivePower(
                 new Pose2d(
                         y * Constants.directionSign,

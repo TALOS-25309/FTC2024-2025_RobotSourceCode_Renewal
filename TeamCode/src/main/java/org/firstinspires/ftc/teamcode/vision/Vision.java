@@ -215,10 +215,8 @@ public class Vision {
         double w = (sample.corners.get(2).get(0) - x);
         double h = (sample.corners.get(2).get(1) - y);
 
-        x /= 2;
-        y /= 2;
-        w /= 2;
-        h /= 2;
+        x -= VisionConstants.SHIFT;
+        y -= VisionConstants.SHIFT;
 
         x -= buffer;
         y -= buffer;
@@ -259,18 +257,21 @@ public class Vision {
                         * Math.toDegrees(sample.x_angle) * Math.toDegrees(sample.y_angle);
                  */
                 //*
-                TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
-                TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
-                TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
-                TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
                 //*/
             } else {
+                TelemetrySystem.addDebugData("FLAG", flag);
                 sample.state = Sample.State.FAILED;
             }
+            TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
+            TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
+            TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
+            TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
+
         }
         return sample;
     }
 
+    @Deprecated
     public void capture() {
         if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
             throw new UnsupportedOperationException("This feature is no longer supported");
@@ -284,6 +285,7 @@ public class Vision {
         }
     }
 
+    @Deprecated
     public void checkDifference() {
         if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
             throw new UnsupportedOperationException("This feature is no longer supported");
@@ -299,6 +301,7 @@ public class Vision {
         }
     }
 
+    @Deprecated
     public boolean isDifferent() {
         if(!VisionConstants.VISION_BASES_SAMPLE_PICKUP_CHECK)
             throw new UnsupportedOperationException("This feature is no longer supported");

@@ -33,6 +33,11 @@ public class TeleOpMode_v2 extends OpMode {
 
     @Override
     public void init() {
+        Global.OPMODE = Global.OpMode.TELE;
+        Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+        Global.ASCENDING = false;
+        Global.DETECTING = false;
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -64,19 +69,22 @@ public class TeleOpMode_v2 extends OpMode {
         SmartServo.updateAll();
         SmartMotor.updateAll();
 
+        // Auto Transfer for Specimen
+        if(Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+            if (intake.isLinearSlideInside()
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && deposit.state() == DepositState.REST) {
+                intake.command().transfer();
+                deposit.command().transfer();
+                deposit.command().poseForHighSpecimenScoringBackward();
+            }
+        }
+
         // Checking driver inputs
         checkEmergency();
         if(Global.IS_EMERGENCY) {
             for (Part part : part_list) {
                 part.stop();
-            }
-        } else if(Global.ASCENDING) {
-            if(smartGamepad1.buttonPS().isPressed()) {
-                if (deposit.state() == DepositState.ASCENDING) {
-                    deposit.command().ascendingReady();
-                } else {
-                    deposit.command().ascend();
-                }
             }
         } else {
             controlGamepad1(smartGamepad1);
@@ -103,9 +111,6 @@ public class TeleOpMode_v2 extends OpMode {
     }
 
     public void controlGamepad1(SmartGamepad gamepad) {
-        if(Global.ASCENDING)
-            return;
-
         // Controlling Drive Part
         drive.command().drive(
                 Math.pow(gamepad.triggerLeftStickX().getValue(), 3),
@@ -114,8 +119,26 @@ public class TeleOpMode_v2 extends OpMode {
                         - gamepad.triggerLeftTrigger().getValue()) * 0.4
         );
 
+        if(Global.ASCENDING) {
+            if(gamepad.buttonPS().isPressed()) {
+                if (deposit.state() == DepositState.ASCENDING) {
+                    deposit.command().ascendingReady();
+                } else {
+                    deposit.command().ascend();
+                }
+            }
+            return;
+        }
+
+        if (gamepad.buttonLeftStick().isPressed()) {
+            if (Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN)
+                Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+            else
+                Global.TRANSFER_TYPE = Global.TransferType.SPECIMEN;
+        }
+
         // Controlling Intake & Deposit Parts
-        if (intake.state() == IntakeState.READY_TO_PICKUP
+        if (intake.state() == IntakeState.READY_FOR_PICKUP
                 || intake.state() == IntakeState.PICKED_UP) { // Manual Control (Only Linear)
             intake.command().movePositiondXdY(
                     0,
@@ -123,26 +146,23 @@ public class TeleOpMode_v2 extends OpMode {
             );
         }
         if (gamepad.buttonCircle().isPressed()) {
-            if (intake.state() == IntakeState.READY_TO_PICKUP) { // Auto Pickup (Yellow Sample)
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Yellow Sample)
                 intake.command().automaticTargetForYellowSample();
             }
         }
         if (gamepad.buttonSquare().isPressed()) {
-            if (intake.state() == IntakeState.READY_TO_PICKUP) { // Auto Pickup (Alliance Sample)
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Alliance Sample)
                 intake.command().automaticTargetForAllianceSample();
             }
         }
         if (gamepad.buttonTriangle().isPressed()) { // Integrated Control
-            if(intake.state() == IntakeState.READY_FOR_TRANSFER) {
-                intake.command().drop();
-            }
-            if (deposit.state() == DepositState.READY_TO_PICKUP) {
+            if (deposit.state() == DepositState.READY_FOR_PICKUP) {
                 deposit.command().pickupSpecimen();
-            } else if (deposit.state() == DepositState.READY_TO_DEPOSIT_BASKET) {
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().scoringBasket();
-            } else if (deposit.state() == DepositState.READY_TO_DEPOSIT_SPECIMEN) {
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
                 deposit.command().scoringSpecimen();
-            } else if (deposit.state() == DepositState.READY_TO_DISCARD) {
+            } else if (deposit.state() == DepositState.READY_FOR_DISCARD) {
                 deposit.command().discard();
             }
         }
@@ -164,7 +184,7 @@ public class TeleOpMode_v2 extends OpMode {
 
         // Controlling Intake Part
         if (gamepad.buttonDPadUp().isPressed()) { // UP : Manual Pickup
-            if (intake.state() == IntakeState.READY_TO_PICKUP){
+            if (intake.state() == IntakeState.READY_FOR_PICKUP){
                 intake.command().pickup();
             }
         }
@@ -172,14 +192,14 @@ public class TeleOpMode_v2 extends OpMode {
             // DOWN : Compact Ready (Manual Control) (= Intake Discard)
             intake.command().compactReady();
         }
-        if (intake.state() == IntakeState.READY_TO_PICKUP) { // Manual Control
-            intake.command().movePositiondXdY(
-                    gamepad.triggerLeftStickX().getValue(),
-                    -gamepad.triggerLeftStickY().getValue()
-            );
+        if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Manual Control
             int left = gamepad.buttonLeftBumper().isHeld() ? 1 : 0;
             int right = gamepad.buttonRightBumper().isHeld() ? 1 : 0;
-            intake.command().rotateDeltaOrientation(right-left);
+            intake.command().setPositionDelta(
+                    gamepad.triggerLeftStickX().getValue(),
+                    -gamepad.triggerLeftStickY().getValue(),
+                    right-left
+            );
         }
 
         // Controlling Deposit Part
@@ -190,22 +210,28 @@ public class TeleOpMode_v2 extends OpMode {
         }
         if (gamepad.buttonCircle().isPressed()) { // CIRCLE : Pose for High Scoring (Only Basket)
             if (deposit.state() == DepositState.REST
-                    && intake.state() == IntakeState.READY_FOR_TRANSFER) {
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && Global.TRANSFER_TYPE.equals(Global.TransferType.SAMPLE)) {
                 intake.command().transfer();
                 deposit.command().transfer();
+                deposit.command().poseForHighBasketScoring();
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().poseForHighBasketScoring();
             }
         }
         if (gamepad.buttonSquare().isPressed()) { // SQUARE : Pose for Low Scoring (Only Basket)
             if (deposit.state() == DepositState.REST
-                    && intake.state() == IntakeState.READY_FOR_TRANSFER) {
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && Global.TRANSFER_TYPE.equals(Global.TransferType.SAMPLE)) {
                 intake.command().transfer();
                 deposit.command().transfer();
+                deposit.command().poseForLowBasketScoring();
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().poseForLowBasketScoring();
             }
         }
         if (gamepad.buttonCross().isPressed()) { // CROSS : Discard
-            deposit.command().poseForDiscard();
+            intake.command().drop();
         }
     }
 
@@ -221,10 +247,13 @@ public class TeleOpMode_v2 extends OpMode {
             if(!Global.IS_EMERGENCY) {
                 smartGamepad1.rumble(0.5);
                 smartGamepad2.rumble(0.5);
+                SmartMotor.emergencyStop();
+                SmartServo.emergencyStop();
             }
             Global.IS_EMERGENCY = true;
         } else {
             if(Global.IS_EMERGENCY) {
+                SmartServo.normalState();
                 resetParts();
                 smartGamepad1.rumble(0.1);
                 smartGamepad2.rumble(0.1);

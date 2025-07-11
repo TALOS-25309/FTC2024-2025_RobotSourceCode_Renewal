@@ -110,31 +110,31 @@ public class TeleOpMode extends OpMode {
 
         // Controlling Intake Part
         if (smartGamepad1.buttonDPadUp().isPressed()) {
-            if (intake.state() == IntakeState.READY_TO_PICKUP){
+            if (intake.state() == IntakeState.READY_FOR_PICKUP){
                 intake.command().pickup();
             } else if (intake.state() == IntakeState.PICKED_UP) {
                 intake.command().discard();
             }
         }
         if (smartGamepad1.buttonDPadLeft().isPressed()) {
-            if (intake.state() == IntakeState.READY_TO_PICKUP) {
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) {
                 intake.command().automaticTargetForYellowSample();
             }
         }
         if (smartGamepad1.buttonDPadRight().isPressed()) {
-            if (intake.state() == IntakeState.READY_TO_PICKUP) {
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) {
                 intake.command().automaticTargetForAllianceSample();
             }
         }
-        if (intake.state() == IntakeState.READY_TO_PICKUP
+        if (intake.state() == IntakeState.READY_FOR_PICKUP
             || intake.state() == IntakeState.PICKED_UP) {
-            intake.command().movePositiondXdY(
-                smartGamepad1.triggerLeftStickX().getValue(),
-                -smartGamepad1.triggerLeftStickY().getValue()
-            );
             int left = smartGamepad1.buttonLeftBumper().isHeld() ? 1 : 0;
             int right = smartGamepad1.buttonRightBumper().isHeld() ? 1 : 0;
-            intake.command().rotateDeltaOrientation(right-left);
+            intake.command().setPositionDelta(
+                smartGamepad1.triggerLeftStickX().getValue(),
+                -smartGamepad1.triggerLeftStickY().getValue(),
+                right-left
+            );
         }
 
         // Controlling Deposit Part
@@ -145,21 +145,21 @@ public class TeleOpMode extends OpMode {
         }
         if (smartGamepad1.buttonCircle().isPressed()) {
             if (deposit.state() == DepositState.LOAD_SAMPLE
-            || deposit.state() == DepositState.READY_TO_DEPOSIT_BASKET) {
+            || deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().poseForHighBasketScoring();
             }
             else if (deposit.state() == DepositState.LOAD_SPECIMEN
-            || deposit.state() == DepositState.READY_TO_DEPOSIT_SPECIMEN) {
+            || deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
                 deposit.command().poseForHighSpecimenScoringForward();
             }
         }
         if (smartGamepad1.buttonSquare().isPressed()) {
             if (deposit.state() == DepositState.LOAD_SAMPLE
-                    || deposit.state() == DepositState.READY_TO_DEPOSIT_BASKET) {
+                    || deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().poseForLowBasketScoring();
             }
             else if (deposit.state() == DepositState.LOAD_SPECIMEN
-                    || deposit.state() == DepositState.READY_TO_DEPOSIT_SPECIMEN) {
+                    || deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
                 deposit.command().poseForLowSpecimenScoringForward();
             }
         }
@@ -192,13 +192,13 @@ public class TeleOpMode extends OpMode {
             if(intake.state() == IntakeState.READY_FOR_TRANSFER) {
                 intake.command().drop();
             }
-            if (deposit.state() == DepositState.READY_TO_PICKUP) {
+            if (deposit.state() == DepositState.READY_FOR_PICKUP) {
                 deposit.command().pickupSpecimen();
-            } else if (deposit.state() == DepositState.READY_TO_DEPOSIT_BASKET) {
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
                 deposit.command().scoringBasket();
-            } else if (deposit.state() == DepositState.READY_TO_DEPOSIT_SPECIMEN) {
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
                 deposit.command().scoringSpecimen();
-            } else if (deposit.state() == DepositState.READY_TO_DISCARD) {
+            } else if (deposit.state() == DepositState.READY_FOR_DISCARD) {
                 deposit.command().discard();
             }
         }
