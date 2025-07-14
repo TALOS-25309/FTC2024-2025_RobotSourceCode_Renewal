@@ -22,7 +22,8 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         WRIST_ORIENTATION_RIGHT,
         TURRET_LEFT,
         TURRET_RIGHT,
-        DROP
+        DROP,
+        CAUTIOUS_PICKUP_READY
     }
     public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
     public static ServoState SERVO_STATE = ServoState.READY;
@@ -42,12 +43,12 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
                 break;
             case PICKUP:
-                intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION);
-                intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION);
+                intake.wristUpDownServo.setPosition(Constants.WRIST_PICKUP_POSITION());
+                intake.armUpDownServo.setPosition(Constants.ARM_PICKUP_POSITION());
                 break;
             case TRANSFER:
-                intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION);
-                intake.armUpDownServo.setPosition(Constants.ARM_TRANSFER_POSITION);
+                intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION());
+                intake.armUpDownServo.setPosition(Constants.ARM_TRANSFER_POSITION());
                 intake.turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
                 intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
                 break;
@@ -73,6 +74,9 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 break;
             case TURRET_RIGHT:
                 intake.turretServo.setPosition(Constants.TURRET_RIGHT_LIMIT);
+                break;
+            case CAUTIOUS_PICKUP_READY:
+                intake.armUpDownServo.setPosition(Constants.ARM_CAUTIOUS_PICKUP_READY_POSITION);
                 break;
         }
     }

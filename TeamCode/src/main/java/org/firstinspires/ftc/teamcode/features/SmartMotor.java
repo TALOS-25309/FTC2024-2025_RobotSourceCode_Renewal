@@ -310,4 +310,12 @@ public class SmartMotor {
             smartMotor.update();
         }
     }
+
+    public static void emergencyStop() {
+        for (SmartMotor smartMotor : smartMotors) {
+            if (!smartMotor.isSynchronized) {
+                smartMotor.setPower(0);
+            }
+        }
+    }
 }

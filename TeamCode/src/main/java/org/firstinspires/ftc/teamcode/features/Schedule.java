@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.features;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -69,7 +70,7 @@ class ConditionalTask extends Task {
 public class Schedule {
     private Schedule() {}
     private static final PriorityQueue<Task> tasks = new PriorityQueue<>();
-    private static final LinkedList<ConditionalTask> conditionalTasks = new LinkedList<>();
+    private static final ArrayList<ConditionalTask> conditionalTasks = new ArrayList<>();
     public static final double RUN_INSTANTLY = 0.0;
 
     public static void init() {
@@ -112,12 +113,11 @@ public class Schedule {
             tasks.poll().run();
         }
 
-        Iterator<ConditionalTask> iterator = conditionalTasks.iterator();
-        while (iterator.hasNext()) {
-            ConditionalTask conditionalTask = iterator.next();
+        ArrayList<ConditionalTask> snapshot = new ArrayList<>(conditionalTasks);
+        for (ConditionalTask conditionalTask : snapshot) {
             if (conditionalTask.isReady(currentTime)) {
                 conditionalTask.run();
-                iterator.remove();
+                conditionalTasks.remove(conditionalTask);
             }
         }
 

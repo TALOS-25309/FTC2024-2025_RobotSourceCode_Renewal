@@ -24,6 +24,10 @@ public class VisionTest extends OpMode {
         telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         TelemetrySystem.init(telemetry);
         vision = new Vision(hardwareMap);
+
+        TelemetrySystem.enableClass("Vision");
+        TelemetrySystem.enableClass("Drive");
+        TelemetrySystem.setDebugMode(true);
     }
 
     @Override

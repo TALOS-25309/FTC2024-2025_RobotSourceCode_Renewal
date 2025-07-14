@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Deposit implements Part {
@@ -27,6 +28,15 @@ public class Deposit implements Part {
     public void init(HardwareMap hardwareMap) {
         this.commandProcessor = new Commands(this);
         this.adjustmentProcessor = new Adjustment(this);
+
+        // Initialize state
+        if (Global.OPMODE == Global.OpMode.AUTO_SPECIMEN) {
+            state = DepositState.LOAD_SPECIMEN;
+        } else if (Global.OPMODE == Global.OpMode.AUTO_SAMPLE) {
+            state = DepositState.LOAD_SAMPLE;
+        } else {
+            state = DepositState.REST;
+        }
 
         // Initialize hardware components
         clawServo = new SmartServo(
@@ -54,7 +64,13 @@ public class Deposit implements Part {
 
         // Set initial positions and properties for servos
         clawServo.setDirection(Servo.Direction.FORWARD);
-        clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+        if (Global.OPMODE == Global.OpMode.AUTO_SPECIMEN) {
+            clawServo.setPosition(Constants.CLAW_CLOSED_POSITION_FOR_SPECIMEN);
+        } else if (Global.OPMODE == Global.OpMode.AUTO_SAMPLE) {
+            clawServo.setPosition(Constants.CLAW_CLOSED_POSITION_FOR_SAMPLE);
+        } else {
+            clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+        }
 
         armMainServo.setDirection(Servo.Direction.FORWARD);
         armAuxServo.setDirection(Servo.Direction.FORWARD);
@@ -89,7 +105,6 @@ public class Deposit implements Part {
 
     @Override
     public void stop() {
-        linearSlideMainMotor.setPower(0);
         armMainServo.setPosition(Constants.ARM_READY_POSITION);
         clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
     }

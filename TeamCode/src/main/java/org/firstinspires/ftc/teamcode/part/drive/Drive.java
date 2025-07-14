@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.part.drive;
 
+import static org.firstinspires.ftc.teamcode.opmode.auto.sample.Constants.POSE_INITIAL_X;
+import static org.firstinspires.ftc.teamcode.opmode.auto.sample.Constants.POSE_INITIAL_Y;
+import static org.firstinspires.ftc.teamcode.opmode.auto.sample.Constants.STANDARD_HEADING;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.part.Part;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 public class Drive implements Part {
     Commands commandProcessor;
@@ -25,6 +30,9 @@ public class Drive implements Part {
 
         this.sampleMecanumDrive.setPoseEstimate(Constants.INITIAL_POSITION);
         sampleMecanumDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        Pose2d initialPose = new Pose2d(POSE_INITIAL_X, POSE_INITIAL_Y, Math.toRadians(STANDARD_HEADING));
+        sampleMecanumDrive.setPoseEstimate(initialPose);
     }
 
     @Override
@@ -44,8 +52,8 @@ public class Drive implements Part {
         this.command().stop();
     }
 
-    public TrajectoryBuilder trajectoryBuilder() {
-        return this.sampleMecanumDrive.trajectoryBuilder(this.robotPose);
+    public TrajectorySequenceBuilder trajectorySequenceBuilder() {
+        return this.sampleMecanumDrive.trajectorySequenceBuilder(this.robotPose);
     }
 
     public boolean isBusy() {

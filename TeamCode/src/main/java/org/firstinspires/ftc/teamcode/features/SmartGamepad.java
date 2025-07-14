@@ -112,6 +112,12 @@ public class SmartGamepad {
     public Trigger triggerRightStickY() {
         return new Trigger(gamepadNow.right_stick_y, gamepadLast.right_stick_y, 0.5);
     }
+    public Button buttonLeftStick() {
+        return new Button(gamepadNow.left_stick_button, gamepadLast.left_stick_button);
+    }
+    public Button buttonRightStick() {
+        return new Button(gamepadNow.right_stick_button, gamepadLast.right_stick_button);
+    }
     public Button buttonDPadUp() {
         return new Button(gamepadNow.dpad_up, gamepadLast.dpad_up);
     }

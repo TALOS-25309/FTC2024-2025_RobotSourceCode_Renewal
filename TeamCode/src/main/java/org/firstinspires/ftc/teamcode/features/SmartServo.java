@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.features;
 
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 
 import java.util.Vector;
 
@@ -25,6 +26,7 @@ public class SmartServo {
     private boolean isSynchronized = false;
     private double syncPositionOffset = 0.0; // Difference in position for synchronized servos
     private final Vector<SmartServo> synchronizedServos = new Vector<SmartServo>();
+
 
     public static void init() {
         smartServos.clear();
@@ -220,6 +222,18 @@ public class SmartServo {
     public static void updateAll() {
         for (SmartServo smartServo : smartServos) {
             smartServo.update();
+        }
+    }
+
+    public static void emergencyStop() {
+        for (SmartServo smartServo : smartServos) {
+            smartServo.servo.getController().pwmDisable();
+        }
+    }
+
+    public static void normalState() {
+        for (SmartServo smartServo : smartServos) {
+            smartServo.servo.getController().pwmEnable();
         }
     }
 }
