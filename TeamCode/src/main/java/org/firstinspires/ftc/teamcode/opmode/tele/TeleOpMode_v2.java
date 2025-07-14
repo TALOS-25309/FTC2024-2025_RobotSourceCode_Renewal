@@ -179,7 +179,7 @@ public class TeleOpMode_v2 extends OpMode {
             );
             int left = gamepad.buttonLeftBumper().isHeld() ? 1 : 0;
             int right = gamepad.buttonRightBumper().isHeld() ? 1 : 0;
-            intake.command().rotateDeltaOrientation(right-left);
+            intake.command().rotateDeltaOrientation(1.5*(right-left));
         }
 
         // Controlling Deposit Part
