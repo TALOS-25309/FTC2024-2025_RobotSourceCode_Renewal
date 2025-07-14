@@ -63,7 +63,7 @@ public class Constants {
     public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 0.0; // NOT USE
     public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 0.0; // NOT USE
     public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 29.0;
-    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 34.5;
+    public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 34;
     public static final double LINEAR_SLIDE_ASCENDING_READY_POSITION_IN_CM = 60.0;
     public static final double LINEAR_SLIDE_ASCENDING_CLIMBING_POSITION_IN_CM = 53.0;
     public static final double LINEAR_SLIDE_MAX_LENGTH = 114.3 - 43; // Maximum length of the linear slide in cm

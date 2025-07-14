@@ -90,7 +90,6 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         );
 
         deposit.linearSlideMainMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
-        deposit.linearSlideMainMotor.activatePID();
         double fraction = Constants.LINEAR_SLIDE_RANGE / Constants.LINEAR_SLIDE_MAX_LENGTH;
         deposit.linearSlideMainMotor.setPosition(MOTOR_TARGET_POSITION_IN_CM * fraction);
     }

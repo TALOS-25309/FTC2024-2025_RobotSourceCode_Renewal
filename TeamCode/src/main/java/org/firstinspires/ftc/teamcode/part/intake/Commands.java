@@ -241,22 +241,23 @@ public class Commands {
      * open the claw, and then set the state to {@link IntakeState#READY_FOR_PICKUP}.
      */
     public void discard() {
-        intake.state = IntakeState.READY_FOR_PICKUP;
-        lightOn();
-
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
             intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
             intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
             intake.command().openClaw();
         }, Schedule.RUN_INSTANTLY);
+
+        Schedule.addTask(() -> {
+            intake.state = IntakeState.READY_FOR_PICKUP;
+            lightOn();
+        }, Constants.DISCARD_DELAY_FOR_END);
     }
 
     public void compactReady() {
         Schedule.addTask(() -> {
             intake.current_y = 0.0;
             intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
-            intake.linearSlideMotor.activatePID();
             intake.command().ready();
         }, Schedule.RUN_INSTANTLY);
     }
@@ -272,7 +273,6 @@ public class Commands {
 
         Schedule.addTask(() -> {
             intake.linearSlideMotor.setPosition(0.0); // Move linear slide to the bottom
-            intake.linearSlideMotor.activatePID();
         }, Schedule.RUN_INSTANTLY);
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION());
@@ -323,6 +323,7 @@ public class Commands {
 
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_DROP_POSITION);
+            intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
@@ -418,7 +419,6 @@ public class Commands {
         if(intake.state() != IntakeState.READY_FOR_PICKUP) {
             intake.wristOrientationServo.setPosition(wristPosition);
         }
-        intake.linearSlideMotor.activatePID();
 
         while (angle < 0) {
             angle += 180;

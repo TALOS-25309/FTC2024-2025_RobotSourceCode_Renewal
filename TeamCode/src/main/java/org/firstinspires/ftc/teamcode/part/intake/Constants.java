@@ -46,9 +46,9 @@ class Constants {
     public static double CLAW_CLOSED_POSITION = 0.535;
     public static double CLAW_CLOSED_MAXIMUM_POSITION = 0.61;
 
-    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.205;
-    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.875;
-    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.54;
+    public static double WRIST_ORIENTATION_LEFT_LIMIT = 0.185;
+    public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.855;
+    public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.52;
 
     public static double WRIST_READY_POSITION = 0.53;
     public static double WRIST_PICKUP_POSITION_FOR_SAMPLE = 0.16;
@@ -93,10 +93,10 @@ class Constants {
         }
     }
 
-    public static double TURRET_LEFT_LIMIT = 0.105;
-    public static double TURRET_RIGHT_LIMIT = 0.635;
-    public static double TURRET_TRANSFER_POSITION = 0.37;
-    public static double TURRET_DROP_POSITION = 1.0;
+    public static double TURRET_LEFT_LIMIT = 0.035;
+    public static double TURRET_RIGHT_LIMIT = 0.565;
+    public static double TURRET_TRANSFER_POSITION = 0.3;
+    public static double TURRET_DROP_POSITION = 0.96;
 
     // Analog input values
     public static final double ANALOG_INPUT_MAX = 3.3;
@@ -119,6 +119,8 @@ class Constants {
     public static double DROP_DELAY_FOR_OPEN_CLAW = 0.5;
     public static double DROP_DELAY_FOR_MOVE_CENTER = 0.8;
     public static double DROP_DELAY_FOR_READY = 1.0;
+
+    public static double DISCARD_DELAY_FOR_END = 1.0;
 
     // Others
     public static double LINEAR_SLIDE_READY_POSITION_THRESHOLD = 100;

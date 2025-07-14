@@ -306,7 +306,11 @@ public class Commands {
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
-            deposit.command().poseForSpecimenPickup();
+            if(Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+                deposit.command().rest();
+            } else {
+                deposit.command().poseForSpecimenPickup();
+            }
         }, Constants.SCORING_SPECIMEN_DELAY_FOR_GOTO_READY_POSITION);
     }
 

@@ -28,8 +28,6 @@ public class SpecimenAutoOpMode extends OpMode {
 
     private SpecimenStrategyV1 strategy;
 
-    private boolean alreadyPushedSamples = false;
-
     @Override
     public void init() {
         Global.init(Global.OpMode.AUTO_SPECIMEN, Global.Alliance.RED);
@@ -48,39 +46,37 @@ public class SpecimenAutoOpMode extends OpMode {
         }
 
         strategy = new SpecimenStrategyV1(drive, intake, deposit);
-
-        SampleMecanumDrive.getVelocityConstraint(
-                Constants.SPECIMEN_VELOCITY,
-                DriveConstants.MAX_ANG_VEL,
-                DriveConstants.TRACK_WIDTH
-        );
     }
 
     public void procedure() {
-        Schedule.addTask(() -> {
-            // 1. Specimen을 걸고
-            strategy.scoreSpecimenAndPickupSample();
+        strategy.startSpecimen();
+        Schedule.addConditionalTask(() -> {
+            strategy.moveFirstSample();
             Schedule.addConditionalTask(() -> {
-                // 2. Sample Pickup을 시도
-                strategy.detectSampleAndPickUp();
+                strategy.moveSecondSample();
                 Schedule.addConditionalTask(() -> {
-                    if(strategy.isPickupSuccessful || alreadyPushedSamples) {
-                        // 3. Specimen 가지러 가기
-                        strategy.getSpecimen();
-                    } else {
-                        // 4. Sample 3개 옮기기
-                        strategy.moveThreeSampleToObservationZone();
-                        alreadyPushedSamples = true;
-                    }
-                    Schedule.addConditionalTask(
-                            // 5. 반복
-                            this::procedure,
-                            Schedule.RUN_INSTANTLY,
-                            () -> !drive.isBusy()
-                    );
-                }, Schedule.RUN_INSTANTLY, () -> !strategy.isPickingUpSample);
-            }, Schedule.RUN_INSTANTLY, () -> !drive.isBusy());
-        }, Schedule.RUN_INSTANTLY);
+                    strategy.moveThirdSample();
+                    Schedule.addConditionalTask(() -> {
+                        strategy.pickupSpecimenAfterMoveSample();
+                        Schedule.addConditionalTask(() -> {
+                            strategy.scoreSpecimen();
+                            Schedule.addConditionalTask(() -> {
+                                strategy.pickupSpecimen();
+                                Schedule.addConditionalTask(() -> {
+                                    strategy.scoreSpecimen();
+                                    Schedule.addConditionalTask(() -> {
+                                        strategy.pickupSpecimen();
+                                        Schedule.addConditionalTask(() -> {
+                                            strategy.scoreSpecimen();
+                                        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                                    },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                                },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                            },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                    },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+            },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
     }
 
     @Override

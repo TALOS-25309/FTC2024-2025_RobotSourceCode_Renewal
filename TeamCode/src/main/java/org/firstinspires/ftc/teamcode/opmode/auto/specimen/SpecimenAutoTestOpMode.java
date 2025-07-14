@@ -26,16 +26,21 @@ public class SpecimenAutoTestOpMode extends OpMode {
     private final Deposit deposit = new Deposit();
     private final Drive drive = new Drive();
 
-    private SpecimenStrategyV2 strategy;
+    private SpecimenStrategyV1 strategy;
 
     public enum Strategy {
         START_SPECIMEN,
-        MOVE_SAMPLES,
-        SCORE_SPECIMEN
+        FIRST_SAMPLE,
+        SECOND_SAMPLE,
+        THIRD_SAMPLE,
+        PICKUP_SPECIMEN,
+        SCORE_SPECIMEN,
     }
 
     public static Strategy currentStrategy = Strategy.START_SPECIMEN;
     public static boolean run = false;
+
+    private boolean isPreviousStrategyIsScore = false;
 
     @Override
     public void init() {
@@ -54,7 +59,7 @@ public class SpecimenAutoTestOpMode extends OpMode {
             part.init(hardwareMap);
         }
 
-        strategy = new SpecimenStrategyV2(drive, intake, deposit);
+        strategy = new SpecimenStrategyV1(drive, intake, deposit);
 
         TelemetrySystem.enableClass("Vision");
         TelemetrySystem.enableClass("Drive");
@@ -85,12 +90,31 @@ public class SpecimenAutoTestOpMode extends OpMode {
             switch (currentStrategy) {
                 case START_SPECIMEN:
                     strategy.startSpecimen();
+                    isPreviousStrategyIsScore = false;
                     break;
-                case MOVE_SAMPLES:
-                    strategy.moveSamples();
+                case FIRST_SAMPLE:
+                    strategy.moveFirstSample();
+                    isPreviousStrategyIsScore = false;
+                    break;
+                case SECOND_SAMPLE:
+                    strategy.moveSecondSample();
+                    isPreviousStrategyIsScore = false;
+                    break;
+                case THIRD_SAMPLE:
+                    strategy.moveThirdSample();
+                    isPreviousStrategyIsScore = false;
+                    break;
+                case PICKUP_SPECIMEN:
+                    if(isPreviousStrategyIsScore) {
+                        strategy.pickupSpecimen();
+                    } else {
+                        strategy.pickupSpecimenAfterMoveSample();
+                    }
+                    isPreviousStrategyIsScore = false;
                     break;
                 case SCORE_SPECIMEN:
                     strategy.scoreSpecimen();
+                    isPreviousStrategyIsScore = true;
                     break;
             }
             run = false; // Reset run flag after executing the strategy

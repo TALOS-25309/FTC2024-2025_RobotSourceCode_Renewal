@@ -115,10 +115,6 @@ public class SmartMotor {
         }
     }
 
-    public void resetIntegral() {
-        this.pidController.resetIntegral();
-    }
-
     /**
      * Sets the PID coefficients for the motor.
      * <p>
@@ -171,6 +167,7 @@ public class SmartMotor {
             this.pidController.resetIntegral();
             this.previousTargetPosition = targetPosition;
         }
+        this.activatePID();
     }
 
     /**
@@ -200,7 +197,7 @@ public class SmartMotor {
      * <p>
      * After activation, the motor will use PID control to reach the target position.
      */
-    public void activatePID() {
+    private void activatePID() {
         if (isSynchronized) {
             throw new IllegalStateException("Cannot activate PID while synchronized.");
         }

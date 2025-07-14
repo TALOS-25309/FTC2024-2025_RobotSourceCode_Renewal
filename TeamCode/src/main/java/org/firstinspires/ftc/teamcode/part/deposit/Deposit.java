@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
+import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 
@@ -90,24 +91,22 @@ public class Deposit implements Part {
                 Constants.LINEAR_SLIDE_PID_D
         );
         linearSlideMainMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
-        linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
-        linearSlideMainMotor.activatePID();
 
         linearSlideAuxMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         linearSlideAuxMotor.setMotorDirection(DcMotor.Direction.FORWARD);
         linearSlideAuxMotor.synchronizeWith(Constants.LINEAR_SLIDE_MAIN_MOTOR_NAME);
-
-        linearSlideMainMotor.setPosition(0);
     }
 
     @Override
     public void start() {
-        linearSlideMainMotor.resetIntegral();
+        linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_READY_POSITION);
     }
 
     @Override
     public void update() {
         adjustmentProcessor.update();
+
+        TelemetrySystem.addClassData("Deposit", "state", this.state.toString());
     }
 
     @Override

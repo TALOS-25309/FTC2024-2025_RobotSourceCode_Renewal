@@ -34,7 +34,7 @@ public class MeepMeepVisualizer {
         );
         Pose2d firstSidePose = new Pose2d(
                 POSE_SAMPLE_SIDE_X,
-                POSE_SAMPLE_PICKUP_Y,
+                POSE_SAMPLE_SIDE_Y,
                 Math.toRadians(STANDARD_HEADING)
         );
         Pose2d secondSidePose = new Pose2d(
@@ -88,26 +88,18 @@ public class MeepMeepVisualizer {
                 Math.toRadians(STANDARD_HEADING)
         );
 
-        /*
         myBot.runAction(myBot.getDrive().actionBuilder(currentPose)
                 .setReversed(true)
                 .splineToLinearHeading(firstSidePose, Math.toRadians(STANDARD_HEADING))
                 .splineToLinearHeading(secondSidePose, Math.toRadians(STANDARD_HEADING))
-                .splineToLinearHeading(firstSampleStartPose, Math.toRadians(BACK))
-                .splineToLinearHeading(firstSampleEndPose, Math.toRadians(BACK))
-                .splineToLinearHeading(firstSampleStartPose, Math.toRadians(STANDARD_HEADING))
-                .splineToLinearHeading(secondSampleStartPose, Math.toRadians(BACK))
-                .splineToLinearHeading(secondSampleEndPose, Math.toRadians(BACK))
-                .splineToLinearHeading(secondSampleStartPose, Math.toRadians(STANDARD_HEADING))
-                .splineToLinearHeading(thirdSampleStartPose, Math.toRadians(BACK))
-                .splineToLinearHeading(thirdSampleEndPose, Math.toRadians(BACK))
-                .splineToLinearHeading(specimenReadyPose, Math.toRadians(BACK))
+                .strafeToConstantHeading(firstSampleStartPose.position)
+                .strafeToConstantHeading(firstSampleEndPose.position)
+                .splineToLinearHeading(secondSampleStartPose, Math.toRadians(RIGHT))
+                .strafeToConstantHeading(secondSampleEndPose.position)
+                .splineToLinearHeading(thirdSampleStartPose, Math.toRadians(RIGHT))
+                .strafeToConstantHeading(thirdSampleEndPose.position)
+                .splineToLinearHeading(specimenReadyPose, Math.toRadians(LEFT))
                 .strafeTo(specimenPose.position)
-                .build());
-        */
-
-        myBot.runAction(myBot.getDrive().actionBuilder(specimenPose)
-                .splineToLinearHeading(depositPose, Math.toRadians(STANDARD_HEADING))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

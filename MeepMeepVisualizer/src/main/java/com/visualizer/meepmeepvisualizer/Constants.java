@@ -46,6 +46,7 @@ public class Constants {
     public static double SAMPLE_MOVE_ROBOT_POSITION_OFFSET = 5;
 
     public static double POSE_SAMPLE_SIDE_X = 1.5 * TILE_SIZE;
+    public static double POSE_SAMPLE_SIDE_Y = -2 * TILE_SIZE;
     public static double POSE_SAMPLE_START_Y = -0.5 * TILE_SIZE;
     public static double POSE_SAMPLE_END_Y = -2 * TILE_SIZE;
     public static double POSE_SAMPLE_1_X = 1.9 * TILE_SIZE;

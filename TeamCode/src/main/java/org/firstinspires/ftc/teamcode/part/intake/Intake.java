@@ -86,12 +86,12 @@ public class Intake implements Part {
                 Constants.LINEAR_SLIDE_PID_D
         );
         linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
-        linearSlideMotor.setPosition(0);
     }
 
     @Override
     public void start() {
-        linearSlideMotor.resetIntegral();
+        command().lightOn();
+        linearSlideMotor.setPosition(0);
     }
 
     @Override

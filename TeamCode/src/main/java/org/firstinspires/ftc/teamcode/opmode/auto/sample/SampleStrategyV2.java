@@ -22,6 +22,8 @@ public class SampleStrategyV2 {
 
     private boolean isRun = false;
 
+    private int dx = 0;
+
     private void run() {
         isRun = true;
     }
@@ -185,15 +187,18 @@ public class SampleStrategyV2 {
         TrajectorySequence pickupTrajectory = drive.drive().trajectorySequenceBuilder(currentPose)
                 .addTemporalMarker(() -> {
                     Schedule.addTask(() -> {
-                        intake.command().movePositionXY(0, LINEAR_SAMPLE_PICKUP_Y_o);
+                        intake.command().movePositionXY(0,
+                                LINEAR_SAMPLE_PICKUP_Y_o + LINEAR_SAMPLE_PICKUP_dY * dx);
                     }, DELAY_FOR_STRETCH_TO_OTHER_SAMPLE);
                 })
                 .splineToLinearHeading(samplePickupPose, Math.toRadians(RIGHT))
                 .addTemporalMarker(() -> {
-                    detectionLoop(false,3, true);
                     Schedule.addConditionalTask(() -> {
-                        scoring.set(true);
-                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                        detectionLoop(false,3, true);
+                        Schedule.addConditionalTask(() -> {
+                            scoring.set(true);
+                        }, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
                 })
                 .build();
         TrajectorySequence depositTrajectory = drive.drive().trajectorySequenceBuilder(pickupTrajectory.end())
@@ -218,6 +223,7 @@ public class SampleStrategyV2 {
                         } else {
                             if(withMovement) {
                                 intake.command().movePositiondXdY(0, LINEAR_SAMPLE_PICKUP_dY);
+                                dx++;
                             }
                             Schedule.addConditionalTask(() -> {
                                 detectionLoop(cautious, rep - 1, withMovement);

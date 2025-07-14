@@ -197,12 +197,9 @@ public class TeleOpMode extends OpMode {
             intake.command().compactReady();
         }
         if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Manual Control
-            int left = gamepad.buttonLeftBumper().isHeld() ? 1 : 0;
-            int right = gamepad.buttonRightBumper().isHeld() ? 1 : 0;
-            intake.command().setPositionDelta(
+            intake.command().movePositiondXdY(
                     gamepad.triggerLeftStickX().getValue(),
-                    -gamepad.triggerLeftStickY().getValue(),
-                    right-left
+                    -gamepad.triggerLeftStickY().getValue()
             );
         }
 

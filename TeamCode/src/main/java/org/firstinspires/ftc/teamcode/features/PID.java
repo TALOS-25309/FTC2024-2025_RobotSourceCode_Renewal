@@ -65,7 +65,9 @@ public class PID {
      */
     public double update(double error, double min, double max){
         if (counter == 0) {
-            lastLoopTime = System.nanoTime() - 10000000;
+            lastLoopTime = System.nanoTime();
+            counter++;
+            return 0;
         }
 
         long currentTime = System.nanoTime();

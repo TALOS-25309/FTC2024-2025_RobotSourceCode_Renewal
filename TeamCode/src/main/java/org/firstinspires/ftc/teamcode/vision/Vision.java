@@ -7,6 +7,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
 
 import java.util.List;
 
@@ -94,10 +95,15 @@ public class Vision {
                                         sampleCorner.set(j, sampleCorner.get(j) / detectionCnt);
                                     }
                                 }
-
-                                innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
-                                setInputForObtainingOrientation();
-                                limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
+                                if(Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+                                    sample.angle = 90;
+                                    state = State.DETECTED;
+                                    innerState = InnerState.COMPLETED;
+                                } else {
+                                    innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
+                                    setInputForObtainingOrientation();
+                                    limelight.pipelineSwitch(VisionConstants.ORIENTATION_PIPELINE_ID);
+                                }
                             } else {
                                 state = State.FAILED;
                                 innerState = InnerState.COMPLETED;
@@ -173,7 +179,7 @@ public class Vision {
 
         List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
         double meanConfidence = 0.0;
-        double minAbsXDegree = 180;
+        double minAbsDegree = 180;
         for (LLResultTypes.DetectorResult target : detectorResults) {
             String targetLabel = target.getClassName();
             if (targetLabel.equals(label)) {
@@ -185,8 +191,10 @@ public class Vision {
             String targetLabel = target.getClassName();
             if (targetLabel.equals(label)) {
                 if (target.getConfidence() >= meanConfidence
-                    && Math.abs(target.getTargetXDegrees()) < minAbsXDegree) {
-                    minAbsXDegree = Math.abs(target.getTargetXDegrees());
+                    && Math.abs(target.getTargetXDegrees()) + Math.abs(target.getTargetYDegrees())
+                        < minAbsDegree) {
+                    minAbsDegree = Math.abs(target.getTargetXDegrees())
+                            + Math.abs(target.getTargetYDegrees());
                     sample.x_angle = Math.toRadians(target.getTargetXDegrees());
                     sample.y_angle = Math.toRadians(target.getTargetYDegrees());
                     double h = VisionConstants.LIMELIGHT_HEIGHT;

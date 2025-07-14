@@ -3,10 +3,9 @@ package org.firstinspires.ftc.teamcode.opmode.auto.specimen;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.global.Global;
+import org.firstinspires.ftc.teamcode.opmode.auto.GlobalConstants;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
@@ -15,15 +14,28 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import static org.firstinspires.ftc.teamcode.opmode.auto.specimen.Constants.*;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SpecimenStrategyV1 {
     private final Drive drive;
     private final Intake intake;
     private final Deposit deposit;
+    private double DELTA = 2;
+    private double LINEAR_DELTA = 3;
 
-    public boolean isPickupSuccessful = false;
-    public boolean isPickingUpSample = false;
+    private boolean isRun = false;
+
+    private void run() {
+        isRun = true;
+    }
+
+    private void end() {
+        isRun = false;
+    }
+
+    public boolean isEnd() {
+        return !isRun;
+    }
 
     public SpecimenStrategyV1(Drive drive, Intake intake, Deposit deposit) {
         this.drive = drive;
@@ -33,198 +45,257 @@ public class SpecimenStrategyV1 {
         this.drive.drive().setPoseEstimate(initialPose);
     }
 
-    public void scoreSpecimenAndPickupSample() {
+    public void startSpecimen() {
+        run();
+
+        Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+
         Pose2d currentPose = drive.drive().getPoseEstimate();
-        Pose2d samplePickUpPose = new Pose2d(
-                POSE_SAMPLE_PICKUP_X,
-                POSE_SAMPLE_PICKUP_Y,
+        Pose2d depositPose = new Pose2d(
+                POSE_START_SPECIMEN_DEPOSIT_X,
+                POSE_START_SPECIMEN_DEPOSIT_Y,
                 Math.toRadians(STANDARD_HEADING)
         );
 
         TrajectorySequence trajectory = drive.drive().trajectorySequenceBuilder(currentPose)
                 .addTemporalMarker(() -> {
-                    deposit.command().poseForHighSpecimenScoringForward();
+                    Schedule.addTask(() -> {
+                        deposit.command().poseForHighSpecimenScoringForward();
+                    }, Schedule.RUN_INSTANTLY);
                 })
-                .lineToLinearHeading(samplePickUpPose)
+                .waitSeconds(DELAY_FOR_START_SAMPLE_LINEAR_MOVE)
+                .lineToLinearHeading(depositPose)
                 .addTemporalMarker(() -> {
-                    deposit.command().scoringSpecimen();
+                    Schedule.addTask(() -> {
+                        deposit.command().scoringSpecimen();
+                        Schedule.addTask(this::end, DELAY_FOR_START_SAMPLE_END);
+                    }, Schedule.RUN_INSTANTLY);
                 })
-                .addTemporalMarker(() -> {
-                    intake.command().movePositionXY(0, 0);
-                })
-                .waitSeconds(DELAY_FOR_END_SCORE_SPECIMEN_AND_PICK_UP_SAMPLE)
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(
-                                STANDARD_VELOCITY,
-                                DriveConstants.MAX_ANG_VEL,
-                                DriveConstants.TRACK_WIDTH
-                        ),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                )
                 .build();
         drive.command().followTrajectory(trajectory);
     }
 
-    public void detectSampleAndPickUp() {
-        isPickingUpSample = true;
-        intake.command().automaticTargetForAllianceSample();
-        Schedule.addConditionalTask(() -> {
-            isPickingUpSample = false;
-            if(intake.state() == IntakeState.READY_FOR_PICKUP) {
-                intake.command().compactReady();
-                isPickupSuccessful = false;
-            } else {
-                isPickupSuccessful = true;
-            }        }, DELAY_FOR_SAMPLE_DETECTION_CHECK, () -> intake.state() == IntakeState.READY_FOR_TRANSFER
-                || intake.state() == IntakeState.READY_FOR_PICKUP
-        );
-    }
+    public void moveFirstSample() {
+        Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+        run();
 
-    public void getSpecimen() {
-        Pose2d currentPose = drive.drive().getPoseEstimate();
-        Pose2d specimenReadyPose = new Pose2d(
-                POSE_SPECIMEN_READY_X,
-                POSE_SPECIMEN_READY_Y,
-                Math.toRadians(STANDARD_HEADING)
-        );
-        Pose2d specimenPose = new Pose2d(
-                POSE_SPECIMEN_X,
-                POSE_SPECIMEN_Y,
-                Math.toRadians(STANDARD_HEADING)
-        );
-        TrajectorySequence trajectory = drive.drive().trajectorySequenceBuilder(currentPose)
-                .addDisplacementMarker(() -> {
-                    deposit.command().poseForSpecimenPickup();
-                })
-                .lineToLinearHeading(specimenReadyPose)
-                .strafeTo(specimenPose.vec(),
-                    SampleMecanumDrive.getVelocityConstraint(
-                        SPECIMEN_VELOCITY,
-                        DriveConstants.MAX_ANG_VEL,
-                        DriveConstants.TRACK_WIDTH
-                    ),
-                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                )
-                .addDisplacementMarker(() -> {
-                    deposit.command().pickupSpecimen();
-                    if(isPickupSuccessful) {
-                        intake.command().drop();
-                    }
-                })
-                .waitSeconds(DELAY_FOR_GET_SPECIMEN)
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(
-                                STANDARD_VELOCITY,
-                                DriveConstants.MAX_ANG_VEL,
-                                DriveConstants.TRACK_WIDTH
-                        ),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                )
-                .build();
-        drive.command().followTrajectory(trajectory);
-    }
-
-    public void moveThreeSampleToObservationZone() {
         Pose2d currentPose = drive.drive().getPoseEstimate();
         Pose2d observationZonePose = new Pose2d(
                 POSE_OBSERVATION_X,
                 POSE_OBSERVATION_Y,
-                Math.toRadians(SAMPLE_DIRECTION_1)
+                Math.toRadians(POSE_SAMPLE_DIRECTION_1)
         );
-        Pose2d lastSamplePose = new Pose2d(
-                POSE_LAST_SAMPLE_X,
-                POSE_LAST_SAMPLE_Y,
-                Math.toRadians(SAMPLE_DIRECTION_3)
-        );
-
-        AtomicInteger level = new AtomicInteger(1);
-
-        Trajectory startTrajectory = drive.drive().trajectoryBuilder(currentPose, true)
-                .splineToLinearHeading(observationZonePose, Math.toRadians(RIGHT))
-                .build();
 
         TrajectorySequence firstSampleTrajectory = drive.drive().trajectorySequenceBuilder(currentPose)
-                .addTrajectory(startTrajectory)
-                .waitSeconds(startTrajectory.duration())
+                .setReversed(true)
                 .addTemporalMarker(() -> {
-                    intake.command().movePositionXY(0, SAMPLE_DISTANCE_1);
+                    Schedule.addTask(() -> {
+                        intake.command().movePositionXY(LINEAR_SAMPLE_X_1, LINEAR_SAMPLE_Y_1);
+                    }, DELAY_FOR_FIRST_SAMPLE_LINEAR_MOVE);
                 })
-                .waitSeconds(DELAY_FOR_LINEAR_SLIDE_MOVEMENT)
+                .splineToLinearHeading(observationZonePose, Math.toRadians(RIGHT))
                 .addTemporalMarker(() -> {
-                    detectionLoop(false, 3);
-                    Schedule.addConditionalTask(level::getAndIncrement,
-                            Schedule.RUN_INSTANTLY,
-                            () -> intake.state() == IntakeState.READY_FOR_TRANSFER
-                    );
+                    Schedule.addConditionalTask(() -> {
+                        detectionLoop(false, 1);
+                        Schedule.addConditionalTask(() -> {
+                            end();
+                            intake.command().drop();
+                        }, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
+                })
+                .build();
+        drive.command().followTrajectory(firstSampleTrajectory);
+    }
+
+    public void moveSecondSample() {
+        Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+        run();
+
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d observationZonePose = new Pose2d(
+                POSE_OBSERVATION_X,
+                POSE_OBSERVATION_Y,
+                Math.toRadians(POSE_SAMPLE_DIRECTION_2)
+        );
+
+        TrajectorySequence secondSampleTrajectory = drive.drive().trajectorySequenceBuilder(currentPose)
+                .lineToLinearHeading(observationZonePose)
+                .addTemporalMarker(() -> {
+                    Schedule.addTask(() -> {
+                        intake.command().movePositionXY(LINEAR_SAMPLE_X_2, LINEAR_SAMPLE_Y_2);
+                        Schedule.addConditionalTask(() -> {
+                            detectionLoop(false, 1);
+                            Schedule.addConditionalTask(() -> {
+                                intake.command().drop();
+                                Schedule.addTask(this::end, DELAY_AFTER_DROP_SECOND_SAMPLE);
+                            }, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                        }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
+                    }, DELAY_FOR_SECOND_SAMPLE_LINEAR_MOVE);
+                })
+                .build();
+        drive.command().followTrajectory(secondSampleTrajectory);
+    }
+
+    public void moveThirdSample() {
+        Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+        run();
+
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d pickupPose = new Pose2d(
+                POSE_LAST_SAMPLE_X,
+                POSE_LAST_SAMPLE_Y,
+                Math.toRadians(POSE_SAMPLE_DIRECTION_3)
+        );
+
+        Pose2d dropPose = new Pose2d(
+                POSE_LAST_SAMPLE_X,
+                POSE_LAST_SAMPLE_Y,
+                Math.toRadians(POSE_SAMPLE_DIRECTION_LAST)
+        );
+
+        AtomicReference<Boolean> isEnd = new AtomicReference<>(false);
+
+        TrajectorySequence thirdSampleTrajectory = drive.drive().trajectorySequenceBuilder(currentPose)
+                .addTemporalMarker(() -> {
+                    Schedule.addTask(() -> {
+                        intake.command().movePositionXY(LINEAR_SAMPLE_X_3, LINEAR_SAMPLE_Y_3);
+                    }, DELAY_FOR_LAST_SAMPLE_LINEAR_MOVE);
+                })
+                .lineToLinearHeading(pickupPose)
+                .addTemporalMarker(() -> {
+                    Schedule.addConditionalTask(() -> {
+                        detectionLoop(true, 1);
+                        Schedule.addConditionalTask(() -> {
+                            isEnd.set(true);
+                        }, Schedule.RUN_INSTANTLY, () -> intake.state() == IntakeState.READY_FOR_TRANSFER);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
                 })
                 .build();
 
-        TrajectorySequence secondSampleTrajectory = drive.drive().trajectorySequenceBuilder(firstSampleTrajectory.end())
-                .turn(Math.toRadians(SAMPLE_DIRECTION_2 - SAMPLE_DIRECTION_1))
+        TrajectorySequence dropTrajectory = drive.drive().trajectorySequenceBuilder(thirdSampleTrajectory.end())
                 .addTemporalMarker(() -> {
-                    intake.command().drop();
+                    Schedule.addTask(() -> {
+                        intake.command().movePositionXY(LINEAR_SAMPLE_X_LAST, LINEAR_SAMPLE_Y_LAST);
+                    }, DELAY_FOR_DROP_LAST_SAMPLE_LINEAR_MOVE);
                 })
-                .waitSeconds(DELAY_FOR_DROP_SAMPLE)
+                .turn(dropPose.getHeading() - pickupPose.getHeading())
                 .addTemporalMarker(() -> {
-                    intake.command().ready();
-                    intake.command().movePositionXY( 0, SAMPLE_DISTANCE_2);
-                })
-                .forward(SAMPLE_MOVE_ROBOT_POSITION_OFFSET)
-                .waitSeconds(DELAY_FOR_LINEAR_SLIDE_MOVEMENT)
-                .addTemporalMarker(() -> {
-                    detectionLoop(false, 3);
-                    Schedule.addConditionalTask(level::getAndIncrement,
-                            Schedule.RUN_INSTANTLY,
-                            () -> intake.state() == IntakeState.READY_FOR_TRANSFER
-                    );
+                    Schedule.addConditionalTask(() -> {
+                        intake.command().discard();
+                        deposit.command().rest();
+                        end();
+                    }, Schedule.RUN_INSTANTLY, deposit::isLinearSlideStretchPerfectly);
                 })
                 .build();
 
-        TrajectorySequence thirdSampleTrajectory = drive.drive().trajectorySequenceBuilder(secondSampleTrajectory.end())
-                .back(SAMPLE_MOVE_ROBOT_POSITION_OFFSET)
-                .turn(Math.toRadians(SAMPLE_DIRECTION_3 - SAMPLE_DIRECTION_2))
+        drive.command().followTrajectory(thirdSampleTrajectory);
+        Schedule.addConditionalTask(() -> {
+            if (isEnd.get()) {
+                drive.command().followTrajectory(dropTrajectory);
+            }
+        }, Schedule.RUN_INSTANTLY, isEnd::get);
+    }
+
+    public void pickupSpecimen() {
+        Global.TRANSFER_TYPE = Global.TransferType.SPECIMEN;
+        run();
+
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d pickupPose = new Pose2d(
+                POSE_SPECIMEN_PICKUP_X,
+                POSE_SPECIMEN_PICKUP_Y,
+                Math.toRadians(POSE_SPECIMEN_PICKUP_DIRECTION)
+        );
+
+        TrajectorySequence trajectory = drive.drive().trajectorySequenceBuilder(currentPose)
                 .addTemporalMarker(() -> {
-                    intake.command().drop();
+                    Schedule.addTask(() -> {
+                        intake.command().setPosition(LINEAR_SPECIMEN_PICKUP_X, LINEAR_SPECIMEN_PICKUP_Y + LINEAR_DELTA, 0);
+                        LINEAR_DELTA += 3;
+                    }, DELAY_FOR_SPECIMEN_LINEAR_MOVE);
                 })
-                .waitSeconds(DELAY_FOR_DROP_SAMPLE)
+                .splineToLinearHeading(pickupPose, Math.toRadians(POSE_SPECIMEN_PICKUP_DIRECTION))
                 .addTemporalMarker(() -> {
-                    intake.command().ready();
-                    intake.command().movePositionXY( 0, SAMPLE_DISTANCE_3);
-                })
-                .lineToLinearHeading(lastSamplePose)
-                .waitSeconds(DELAY_FOR_LINEAR_SLIDE_MOVEMENT)
-                .addTemporalMarker(() -> {
-                    detectionLoop(true, 1);
-                    Schedule.addConditionalTask(level::getAndIncrement,
-                            Schedule.RUN_INSTANTLY,
-                            () -> intake.state() == IntakeState.READY_FOR_TRANSFER
-                    );
+                    Schedule.addConditionalTask(() -> {
+                        Schedule.addTask(this::pickupLoop, DELAY_PICKUP);
+                        Schedule.addConditionalTask(this::end, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
                 })
                 .build();
 
-        TrajectorySequence endTrajectory = drive.drive().trajectorySequenceBuilder(thirdSampleTrajectory.end())
-                .waitSeconds(DELAY_FOR_LINEAR_SLIDE_MOVEMENT)
+        drive.command().followTrajectory(trajectory);
+    }
+
+    public void pickupSpecimenAfterMoveSample() {
+        Global.TRANSFER_TYPE = Global.TransferType.SPECIMEN;
+        run();
+
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d pickupPose = new Pose2d(
+                POSE_SPECIMEN_PICKUP_X,
+                POSE_SPECIMEN_PICKUP_Y,
+                Math.toRadians(POSE_SPECIMEN_PICKUP_DIRECTION)
+        );
+
+        TrajectorySequence trajectory = drive.drive().trajectorySequenceBuilder(currentPose)
                 .addTemporalMarker(() -> {
-                    intake.command().movePositionXY( 0, SAMPLE_DISTANCE_LAST);
+                    Schedule.addTask(() -> {
+                        intake.command().setPosition(LINEAR_SPECIMEN_PICKUP_X, LINEAR_SPECIMEN_PICKUP_Y, 0);
+                    }, DELAY_FOR_SPECIMEN_LINEAR_MOVE);
                 })
-                .turn(Math.toRadians(SAMPLE_DIRECTION_LAST - SAMPLE_DIRECTION_3))
+                .lineToLinearHeading(pickupPose)
                 .addTemporalMarker(() -> {
-                    intake.command().discard();
+                    Schedule.addConditionalTask(() -> {
+                        Schedule.addTask(this::pickupLoop, DELAY_PICKUP);
+                        Schedule.addConditionalTask(this::end, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideStretchPerfectly);
                 })
                 .build();
 
+        drive.command().followTrajectory(trajectory);
+    }
+
+    public void scoreSpecimen() {
+        Global.TRANSFER_TYPE = Global.TransferType.SPECIMEN;
+        run();
+
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d depositPose = new Pose2d(
+                POSE_SPECIMEN_DEPOSIT_X + DELTA,
+                POSE_SPECIMEN_DEPOSIT_Y,
+                Math.toRadians(BACK)
+        );
+        DELTA += 2;
+
+        TrajectorySequence trajectory = drive.drive().trajectorySequenceBuilder(currentPose)
+                .addTemporalMarker(() -> {
+                    intake.command().transfer();
+                    deposit.command().transfer();
+                    deposit.command().poseForHighSpecimenScoringBackward();
+                })
+                .waitSeconds(DELAY_FOR_SCORING_SPECIMEN_MOVE_ROBOT)
+                .splineToLinearHeading(depositPose, Math.toRadians(STANDARD_HEADING))
+                .addTemporalMarker(() -> {
+                    Schedule.addTask(() -> {
+                        deposit.command().scoringSpecimen();
+                        end();
+                    }, DELAY_FOR_SCORING_SPECIMEN);
+                })
+                .build();
+
+        drive.command().followTrajectory(trajectory);
+    }
+
+    public void pickupLoop() {
+        intake.command().pickup();
         Schedule.addConditionalTask(() -> {
-            drive.command().followTrajectory(firstSampleTrajectory);
-        }, Schedule.RUN_INSTANTLY, () -> level.get() == 1);
-        Schedule.addConditionalTask(() -> {
-            drive.command().followTrajectory(secondSampleTrajectory);
-        }, Schedule.RUN_INSTANTLY, () -> level.get() == 2);
-        Schedule.addConditionalTask(() -> {
-            drive.command().followTrajectory(thirdSampleTrajectory);
-        }, Schedule.RUN_INSTANTLY, () -> level.get() == 3);
-        Schedule.addConditionalTask(() -> {
-            drive.command().followTrajectory(endTrajectory);
-        }, Schedule.RUN_INSTANTLY, () -> level.get() == 4);
+                if(intake.state() == IntakeState.READY_FOR_PICKUP) {
+                    pickupLoop();
+                }
+            }, Schedule.RUN_INSTANTLY,
+            () -> intake.state() == IntakeState.READY_FOR_PICKUP
+                    || intake.state() == IntakeState.READY_FOR_TRANSFER
+        );
     }
 
     public void detectionLoop(boolean cautious, int rep) {
