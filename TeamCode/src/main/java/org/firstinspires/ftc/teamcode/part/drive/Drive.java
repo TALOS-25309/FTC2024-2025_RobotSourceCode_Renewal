@@ -36,6 +36,11 @@ public class Drive implements Part {
     }
 
     @Override
+    public void start() {
+
+    }
+
+    @Override
     public void update() {
         this.sampleMecanumDrive.update();
 

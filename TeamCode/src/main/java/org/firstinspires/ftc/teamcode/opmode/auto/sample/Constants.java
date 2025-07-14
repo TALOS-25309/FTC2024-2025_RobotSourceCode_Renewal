@@ -22,6 +22,7 @@ public class Constants {
     public static double POSE_SAMPLE_PICKUP_DIRECTION_1 = 70.26984;
     public static double POSE_SAMPLE_PICKUP_DIRECTION_2 = 81.41295;
     public static double POSE_SAMPLE_PICKUP_DIRECTION_3 = 130.44356;
+    public static double POSE_SAMPLE_PICKUP_DIRECTION_o = 20;
 
     public static double POSE_SAMPLE_PICKUP_X_1 = -60.14386;
     public static double POSE_SAMPLE_PICKUP_Y_1 = -54.97208;
@@ -32,13 +33,22 @@ public class Constants {
     public static double POSE_SAMPLE_PICKUP_X_3 = -55.79253;
     public static double POSE_SAMPLE_PICKUP_Y_3 = -45.68016;
 
-    public static double LINEAR_SAMPLE_PICKUP_X_1 = -5;
-    public static double LINEAR_SAMPLE_PICKUP_Y_1 = 50;
+    public static double POSE_SAMPLE_PICKUP_X_o = -26.5;
+    public static double POSE_SAMPLE_PICKUP_Y_o = -5;
+
+    public static double LINEAR_SAMPLE_PICKUP_X_1 = 0;
+    public static double LINEAR_SAMPLE_PICKUP_Y_1 = 53;
     public static double LINEAR_SAMPLE_PICKUP_X_2 = -5;
     public static double LINEAR_SAMPLE_PICKUP_Y_2 = 45;
-    public static double LINEAR_SAMPLE_PICKUP_X_3 = -5;
+    public static double LINEAR_SAMPLE_PICKUP_X_3 = -0.5;
     public static double LINEAR_SAMPLE_PICKUP_Y_3 = 35;
+    public static double LINEAR_SAMPLE_PICKUP_Y_o = 35;
+    public static double LINEAR_SAMPLE_PICKUP_dY = 10;
 
-    public static double DELAY_FOR_BASKET_LINEAR_MOVE = 1.5;
+    public static double DELAY_FOR_BASKET_LINEAR_MOVE = 1.1;
+    public static double DELAY_FOR_FIRST_BASKET_LINEAR_MOVE = 0.5;
     public static double DELAY_FOR_START_BASKET_LINEAR_MOVE = 0.3;
+    public static double DELAY_FOR_BASKET_HORIZONTAL_MOVE = 0.2;
+    public static double DELAY_FOR_STRETCH_TO_OTHER_SAMPLE = 1.5;
+    public static double DELAY_FOR_DEPOSIT_OTHER_SAMPLE = 0.5;
 }

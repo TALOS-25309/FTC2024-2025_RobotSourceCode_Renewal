@@ -19,7 +19,7 @@ class Constants {
     public static final Boolean WHEEL_REVERSE_RIGHT_FRONT = false;
     public static final Boolean WHEEL_REVERSE_RIGHT_REAR = false;
 
-    public static final String ODOMETRY_NAME_LEFT = "leftFront";
+    public static final String ODOMETRY_NAME_LEFT = "leftBack";
     public static final String ODOMETRY_NAME_RIGHT = "rightBack";
     public static final String ODOMETRY_NAME_FRONT = "rightFront";
 

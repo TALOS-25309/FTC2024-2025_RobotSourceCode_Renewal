@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.firstinspires.ftc.teamcode.opmode.auto.sample.Constants.*;
 
-public class SampleStrategy {
+public class SampleStrategyV1 {
     private final Drive drive;
     private final Intake intake;
     private final Deposit deposit;
@@ -34,7 +34,7 @@ public class SampleStrategy {
         return !isRun;
     }
 
-    public SampleStrategy(Drive drive, Intake intake, Deposit deposit) {
+    public SampleStrategyV1(Drive drive, Intake intake, Deposit deposit) {
         this.drive = drive;
         this.intake = intake;
         this.deposit = deposit;
@@ -55,7 +55,6 @@ public class SampleStrategy {
                     deposit.command().poseForHighBasketScoring();
                 })
                 .lineToLinearHeading(sampleDepositPose)
-                .waitSeconds(DELAY_FOR_START_BASKET_LINEAR_MOVE)
                 .addTemporalMarker(() -> {
                     end();
                     deposit.command().scoringBasket();
@@ -143,6 +142,42 @@ public class SampleStrategy {
         drive.command().followTrajectory(pickupTrajectory);
         Schedule.addConditionalTask(() -> {
             drive.command().followTrajectory(scoringTrajectory);
+        }, Schedule.RUN_INSTANTLY, scoring::get);
+    }
+
+    public void otherSample() {
+        run();
+        Pose2d currentPose = drive.drive().getPoseEstimate();
+        Pose2d samplePickupPose = new Pose2d(
+                POSE_SAMPLE_PICKUP_X_o,
+                POSE_SAMPLE_PICKUP_Y_o,
+                Math.toRadians(POSE_SAMPLE_PICKUP_DIRECTION_o)
+        );
+        Pose2d sampleDepositPose = new Pose2d(
+                POSE_SAMPLE_DEPOSIT_X,
+                POSE_SAMPLE_DEPOSIT_Y,
+                Math.toRadians(POSE_SAMPLE_DEPOSIT_ORIENTATION)
+        );
+        AtomicReference<Boolean> scoring = new AtomicReference<>(false);
+        TrajectorySequence pickupTrajectory = drive.drive().trajectorySequenceBuilder(currentPose)
+                .addTemporalMarker(() -> {
+                    intake.command().movePositionXY(0, LINEAR_SAMPLE_PICKUP_Y_o);
+                })
+                .lineToLinearHeading(samplePickupPose)
+                .addTemporalMarker(() -> {
+                    detectionLoop(false,3);
+                    Schedule.addConditionalTask(() -> {
+                        scoring.set(true);
+                    }, Schedule.RUN_INSTANTLY, intake::isLinearSlideInside);
+                })
+                .build();
+        TrajectorySequence depositTrajectory = drive.drive().trajectorySequenceBuilder(pickupTrajectory.end())
+                .addTemporalMarker(this::transferAndScoring)
+                .lineToLinearHeading(sampleDepositPose)
+                .build();
+        drive.command().followTrajectory(pickupTrajectory);
+        Schedule.addConditionalTask(() -> {
+            drive.command().followTrajectory(depositTrajectory);
         }, Schedule.RUN_INSTANTLY, scoring::get);
     }
 

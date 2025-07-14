@@ -31,7 +31,7 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     public static double WHEEL_RADIUS = 0.944882; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 10.0787; // Calculated : 10.0787 in; distance between the left and right wheels
+    public static double LATERAL_DISTANCE = 9.92126; // Calculated : 10.0787 in; distance between the left and right wheels
     public static double FORWARD_OFFSET = 4.88189; // Calculated : 4.88189 in; offset of the lateral wheel
 
     private Encoder leftEncoder, rightEncoder, frontEncoder;
@@ -39,8 +39,8 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     private List<Integer> lastEncPositions, lastEncVels;
 
     /* StandardTrackingWheelLocalizer.java 파일의 약 37~38줄 */
-    public static double X_MULTIPLIER = 0.99; // X 방향 보정 계수
-    public static double Y_MULTIPLIER = 0.993; //1.003975; // Y 방향 보정 계수
+    public static double X_MULTIPLIER = 0.9955; // X 방향 보정 계수
+    public static double Y_MULTIPLIER = 0.99275; //1.003975; // Y 방향 보정 계수
 
 
 

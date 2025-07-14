@@ -40,7 +40,7 @@ public class DriveConstants {
     public static Boolean WHEEL_REVERSE_RIGHT_FRONT = false;
     public static Boolean WHEEL_REVERSE_RIGHT_REAR = false;
 
-    public static String ODOMETRY_NAME_LEFT = "leftFront"; // leftOdo
+    public static String ODOMETRY_NAME_LEFT = "leftBack"; // leftOdo
     public static String ODOMETRY_NAME_RIGHT = "rightBack"; // rightOdo
     public static String ODOMETRY_NAME_FRONT = "rightFront"; // frontOdo
 
@@ -70,7 +70,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 2.04724; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 9.754; // Calculated : 9.76378// in
+    public static double TRACK_WIDTH = 9.5325; // Calculated : 9.76378// in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using

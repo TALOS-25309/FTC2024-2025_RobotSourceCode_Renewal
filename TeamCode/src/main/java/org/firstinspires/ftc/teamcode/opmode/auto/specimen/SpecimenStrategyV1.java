@@ -7,7 +7,6 @@ import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.global.Global;
-import org.firstinspires.ftc.teamcode.opmode.auto.GlobalConstants;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
@@ -15,11 +14,10 @@ import org.firstinspires.ftc.teamcode.part.intake.IntakeState;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import static org.firstinspires.ftc.teamcode.opmode.auto.specimen.Constants.*;
-import static org.firstinspires.ftc.teamcode.opmode.auto.GlobalConstants.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SpecimenStrategy {
+public class SpecimenStrategyV1 {
     private final Drive drive;
     private final Intake intake;
     private final Deposit deposit;
@@ -27,7 +25,7 @@ public class SpecimenStrategy {
     public boolean isPickupSuccessful = false;
     public boolean isPickingUpSample = false;
 
-    public SpecimenStrategy(Drive drive, Intake intake, Deposit deposit) {
+    public SpecimenStrategyV1(Drive drive, Intake intake, Deposit deposit) {
         this.drive = drive;
         this.intake = intake;
         this.deposit = deposit;

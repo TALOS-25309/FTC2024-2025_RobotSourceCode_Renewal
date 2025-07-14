@@ -96,6 +96,13 @@ public class Deposit implements Part {
         linearSlideAuxMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         linearSlideAuxMotor.setMotorDirection(DcMotor.Direction.FORWARD);
         linearSlideAuxMotor.synchronizeWith(Constants.LINEAR_SLIDE_MAIN_MOTOR_NAME);
+
+        linearSlideMainMotor.setPosition(0);
+    }
+
+    @Override
+    public void start() {
+        linearSlideMainMotor.resetIntegral();
     }
 
     @Override
@@ -119,5 +126,14 @@ public class Deposit implements Part {
 
     public DepositState state() {
         return state;
+    }
+
+    public boolean isLinearSlideInside() {
+        return linearSlideMainMotor.getCurrentPosition() < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
+    }
+
+    public boolean isLinearSlideStretchPerfectly() {
+        return Math.abs(linearSlideMainMotor.getTargetPosition() - linearSlideMainMotor.getCurrentPosition())
+                < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
     }
 }

@@ -23,18 +23,24 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         CLOSE_CLAW
     }
 
-    public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
+    public static boolean PID_ACTIVATED = false;
+    public static boolean SERVO_ACTIVATED = false;
+
     public static ServoState SERVO_STATE = ServoState.READY;
     public static double MOTOR_TARGET_POSITION_IN_CM = 0.0;
 
     @Override
     protected void setAdjustState() {
-        this.adjustState = ADJUSTMENT_STATE;
+        PIDActivated = PID_ACTIVATED;
+        ServoActivated = SERVO_ACTIVATED;
     }
 
     @Override
     protected void adjustServo() {
-        deposit.linearSlideMainMotor.stop();
+        deposit.armMainServo.servo().getController().pwmEnable();
+        deposit.armAuxServo.servo().getController().pwmEnable();
+        deposit.clawServo.servo().getController().pwmEnable();
+
         switch (SERVO_STATE) {
             case READY:
                 deposit.armMainServo.setPosition(Constants.ARM_READY_POSITION);
@@ -90,17 +96,23 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
     }
 
     @Override
+    protected void releaseServo() {
+        deposit.armMainServo.servo().getController().pwmDisable();
+        deposit.armAuxServo.servo().getController().pwmDisable();
+        deposit.clawServo.servo().getController().pwmDisable();
+    }
+
+    @Override
+    protected void releasePID() {
+        deposit.linearSlideMainMotor.stop();
+    }
+
+    @Override
     protected void printEncoderValue() {
-        deposit.linearSlideMainMotor.setPower(0);
         TelemetrySystem.addClassData(
                 "DepositAdjustment",
                 "Linear Slide Encoder Value",
                 deposit.linearSlideMainMotor.getCurrentPosition()
         );
-    }
-
-    @Override
-    protected void printAnalogInputValue() {
-
     }
 }

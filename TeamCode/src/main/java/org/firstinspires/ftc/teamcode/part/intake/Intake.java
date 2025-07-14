@@ -23,6 +23,8 @@ public class Intake implements Part {
     SmartServo armUpDownServo;
     SmartServo turretServo;
 
+    DcMotor light;
+
     SmartMotor linearSlideMotor;
 
     AnalogInput clawAnalogInput;
@@ -64,6 +66,7 @@ public class Intake implements Part {
                 Constants.LINEAR_SLIDE_MOTOR_NAME
         );
         clawAnalogInput = hardwareMap.get(AnalogInput.class, Constants.CLAW_ANALOG_INPUT_NAME);
+        light = hardwareMap.get(DcMotor.class, Constants.LED_NAME);
 
         // Set initial positions
         clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
@@ -74,8 +77,8 @@ public class Intake implements Part {
 
         // Set motor properties
         linearSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        linearSlideMotor.setMotorDirection(DcMotor.Direction.FORWARD);
-        linearSlideMotor.setEncoderDirection(DcMotor.Direction.REVERSE);
+        linearSlideMotor.setMotorDirection(DcMotor.Direction.REVERSE);
+        linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
         linearSlideMotor.resetEncoder();
         linearSlideMotor.setPID(
                 Constants.LINEAR_SLIDE_PID_P,
@@ -83,6 +86,12 @@ public class Intake implements Part {
                 Constants.LINEAR_SLIDE_PID_D
         );
         linearSlideMotor.setMotorMaximumPower(Constants.LINEAR_SLIDE_MAX_POWER);
+        linearSlideMotor.setPosition(0);
+    }
+
+    @Override
+    public void start() {
+        linearSlideMotor.resetIntegral();
     }
 
     @Override
@@ -98,6 +107,7 @@ public class Intake implements Part {
         TelemetrySystem.addClassData("Intake", "state", this.state.toString());
         TelemetrySystem.addClassData("Intake", "X", this.current_x);
         TelemetrySystem.addClassData("Intake", "Y", this.current_y);
+        TelemetrySystem.addClassData("Intake", "Ori", this.current_orientation);
     }
 
     @Override
@@ -123,5 +133,10 @@ public class Intake implements Part {
 
     public boolean isLinearSlideInside() {
         return linearSlideMotor.getCurrentPosition() < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
+    }
+
+    public boolean isLinearSlideStretchPerfectly() {
+        return Math.abs(linearSlideMotor.getTargetPosition() - linearSlideMotor.getCurrentPosition())
+                < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
     }
 }

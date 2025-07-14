@@ -33,8 +33,14 @@ public class TeleOpMode extends OpMode {
 
     private boolean lastDetecting = Global.DETECTING;
 
+    protected void globalInit() {
+
+    }
+
     @Override
     public void init() {
+        globalInit();
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -50,6 +56,17 @@ public class TeleOpMode extends OpMode {
         for (Part part : part_list) {
             part.init(hardwareMap);
         }
+
+        TelemetrySystem.enableClass("Vision");
+        TelemetrySystem.enableClass("Drive");
+        TelemetrySystem.setDebugMode(true);
+    }
+
+    @Override
+    public void start() {
+        for (Part part : part_list) {
+            part.start();
+        }
     }
 
     @Override
@@ -62,15 +79,26 @@ public class TeleOpMode extends OpMode {
         SmartServo.updateAll();
         SmartMotor.updateAll();
 
+        // Auto Transfer for Specimen
+        if(Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+            if (intake.isLinearSlideInside()
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && deposit.state() == DepositState.REST) {
+                intake.command().transfer();
+                deposit.command().transfer();
+                deposit.command().poseForHighSpecimenScoringBackward();
+            }
+        }
+
         // Checking driver inputs
         checkEmergency();
-        if(!Global.IS_EMERGENCY) {
-            controlGamepad1();
-            controlGamepad2();
-        } else {
+        if(Global.IS_EMERGENCY) {
             for (Part part : part_list) {
                 part.stop();
             }
+        } else {
+            controlGamepad1(smartGamepad1);
+            controlGamepad2(smartGamepad2);
         }
 
         smartGamepad1.update();
@@ -92,106 +120,44 @@ public class TeleOpMode extends OpMode {
         Schedule.stop();
     }
 
-    public void controlGamepad1() {
-        // Controlling Transfer & Drop
-        if (smartGamepad1.buttonDPadDown().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_TRANSFER
-                && deposit.state() == DepositState.REST) {
-                intake.command().transfer();
-                deposit.command().transfer();
-            } else if (intake.state() == IntakeState.PICKED_UP) {
-                intake.command().readyForTransfer();
-            } else {
-                intake.command().compactReady();
-            }
-        }
-
-        TelemetrySystem.addClassData("Intake", "state",intake.state().toString());
-
-        // Controlling Intake Part
-        if (smartGamepad1.buttonDPadUp().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_PICKUP){
-                intake.command().pickup();
-            } else if (intake.state() == IntakeState.PICKED_UP) {
-                intake.command().discard();
-            }
-        }
-        if (smartGamepad1.buttonDPadLeft().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_PICKUP) {
-                intake.command().automaticTargetForYellowSample();
-            }
-        }
-        if (smartGamepad1.buttonDPadRight().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_PICKUP) {
-                intake.command().automaticTargetForAllianceSample();
-            }
-        }
-        if (intake.state() == IntakeState.READY_FOR_PICKUP
-            || intake.state() == IntakeState.PICKED_UP) {
-            int left = smartGamepad1.buttonLeftBumper().isHeld() ? 1 : 0;
-            int right = smartGamepad1.buttonRightBumper().isHeld() ? 1 : 0;
-            intake.command().setPositionDelta(
-                smartGamepad1.triggerLeftStickX().getValue(),
-                -smartGamepad1.triggerLeftStickY().getValue(),
-                right-left
-            );
-        }
-
-        // Controlling Deposit Part
-        if (smartGamepad1.buttonTriangle().isPressed()) {
-            if (deposit.state() == DepositState.REST) {
-                deposit.command().poseForSpecimenPickup();
-            }
-        }
-        if (smartGamepad1.buttonCircle().isPressed()) {
-            if (deposit.state() == DepositState.LOAD_SAMPLE
-            || deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
-                deposit.command().poseForHighBasketScoring();
-            }
-            else if (deposit.state() == DepositState.LOAD_SPECIMEN
-            || deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
-                deposit.command().poseForHighSpecimenScoringForward();
-            }
-        }
-        if (smartGamepad1.buttonSquare().isPressed()) {
-            if (deposit.state() == DepositState.LOAD_SAMPLE
-                    || deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
-                deposit.command().poseForLowBasketScoring();
-            }
-            else if (deposit.state() == DepositState.LOAD_SPECIMEN
-                    || deposit.state() == DepositState.READY_FOR_DEPOSIT_SPECIMEN) {
-                deposit.command().poseForLowSpecimenScoringForward();
-            }
-        }
-        if (smartGamepad1.buttonCross().isPressed()) {
-            deposit.command().poseForDiscard();
-        }
-    }
-
-    public void controlGamepad2() {
+    public void controlGamepad1(SmartGamepad gamepad) {
         // Controlling Drive Part
-        if (Math.abs(smartGamepad2.triggerLeftStickX().getValue()) > 0.0
-        || Math.abs(smartGamepad2.triggerLeftStickY().getValue()) > 0.0){
-            drive.command().drive(
-                    smartGamepad2.triggerLeftStickX().getValue(),
-                    -smartGamepad2.triggerLeftStickY().getValue(),
-                    (smartGamepad2.triggerRightTrigger().getValue()
-                            - smartGamepad2.triggerLeftTrigger().getValue()) * 0.4
-            );
-        } else {
-            drive.command().drive(
-                    smartGamepad2.triggerRightStickX().getValue() * 0.3,
-                    -smartGamepad2.triggerRightStickY().getValue() * 0.3,
-                    (smartGamepad2.triggerRightTrigger().getValue()
-                            - smartGamepad2.triggerLeftTrigger().getValue()) * 0.4
-            );
+        drive.command().drive(
+                gamepad.triggerLeftStickX().getValue(),
+                -gamepad.triggerLeftStickY().getValue(),
+                (gamepad.triggerRightTrigger().getValue()
+                        - gamepad.triggerLeftTrigger().getValue()) * 0.4
+        );
+
+        if(Global.ASCENDING)
+            return;
+
+        if (gamepad.buttonLeftStick().isPressed()) {
+            if (Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN)
+                Global.TRANSFER_TYPE = Global.TransferType.SAMPLE;
+            else
+                Global.TRANSFER_TYPE = Global.TransferType.SPECIMEN;
         }
 
         // Controlling Intake & Deposit Parts
-        if (smartGamepad2.buttonTriangle().isPressed()) {
-            if(intake.state() == IntakeState.READY_FOR_TRANSFER) {
-                intake.command().drop();
+        if (intake.state() == IntakeState.READY_FOR_PICKUP
+                || intake.state() == IntakeState.PICKED_UP) { // Manual Control (Only Linear)
+            intake.command().movePositiondXdY(
+                    0,
+                    -gamepad.triggerRightStickY().getValue() * 1.3
+            );
+        }
+        if (gamepad.buttonCircle().isPressed()) {
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Yellow Sample)
+                intake.command().automaticTargetForYellowSample();
             }
+        }
+        if (gamepad.buttonSquare().isPressed()) {
+            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Alliance Sample)
+                intake.command().automaticTargetForAllianceSample();
+            }
+        }
+        if (gamepad.buttonTriangle().isPressed()) { // Integrated Control
             if (deposit.state() == DepositState.READY_FOR_PICKUP) {
                 deposit.command().pickupSpecimen();
             } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
@@ -202,23 +168,113 @@ public class TeleOpMode extends OpMode {
                 deposit.command().discard();
             }
         }
-        if (smartGamepad2.buttonCross().isPressed()) {
+        if (gamepad.buttonCross().isPressed()) { // Discard
             deposit.command().discard();
         }
     }
 
-    public void checkEmergency() {
-        if (smartGamepad1.buttonLeftBumper().isHeld()
-        && smartGamepad1.buttonRightBumper().isHeld()
-        && smartGamepad1.triggerLeftTrigger().isHeld()
-        && smartGamepad1.triggerRightTrigger().isHeld()) {
-            Global.IS_EMERGENCY = true;
-            smartGamepad1.rumble(0.5);
-            smartGamepad2.rumble(0.5);
-        } else if (smartGamepad1.buttonA().isPressed()) {
-            Global.IS_EMERGENCY = false;
-            smartGamepad1.rumble(0.1);
-            smartGamepad2.rumble(0.1);
+    public void controlGamepad2(SmartGamepad gamepad) {
+        // Controlling Ascending
+        if(Global.ASCENDING) {
+            if(gamepad.buttonPS().isPressed()) {
+                if (deposit.state() == DepositState.ASCENDING) {
+                    deposit.command().ascendingReady();
+                } else {
+                    deposit.command().ascend();
+                }
+            }
+            return;
         }
+
+        // Controlling Intake Part
+        if (gamepad.buttonDPadUp().isPressed()) { // UP : Manual Pickup
+            if (intake.state() == IntakeState.READY_FOR_PICKUP){
+                intake.command().pickup();
+            }
+        }
+        if (gamepad.buttonDPadDown().isPressed()) {
+            // DOWN : Compact Ready (Manual Control) (= Intake Discard)
+            intake.command().compactReady();
+        }
+        if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Manual Control
+            int left = gamepad.buttonLeftBumper().isHeld() ? 1 : 0;
+            int right = gamepad.buttonRightBumper().isHeld() ? 1 : 0;
+            intake.command().setPositionDelta(
+                    gamepad.triggerLeftStickX().getValue(),
+                    -gamepad.triggerLeftStickY().getValue(),
+                    right-left
+            );
+        }
+
+        // Controlling Deposit Part
+        if (gamepad.buttonTriangle().isPressed()) { // TRIANGLE : Pickup Specimen
+            if (deposit.state() == DepositState.REST) {
+                deposit.command().poseForSpecimenPickup();
+            }
+        }
+        if (gamepad.buttonCircle().isPressed()) { // CIRCLE : Pose for High Scoring (Only Basket)
+            if (deposit.state() == DepositState.REST
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && Global.TRANSFER_TYPE.equals(Global.TransferType.SAMPLE)) {
+                intake.command().transfer();
+                deposit.command().transfer();
+                deposit.command().poseForHighBasketScoring();
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
+                deposit.command().poseForHighBasketScoring();
+            }
+        }
+        if (gamepad.buttonSquare().isPressed()) { // SQUARE : Pose for Low Scoring (Only Basket)
+            if (deposit.state() == DepositState.REST
+                    && intake.state() == IntakeState.READY_FOR_TRANSFER
+                    && Global.TRANSFER_TYPE.equals(Global.TransferType.SAMPLE)) {
+                intake.command().transfer();
+                deposit.command().transfer();
+                deposit.command().poseForLowBasketScoring();
+            } else if (deposit.state() == DepositState.READY_FOR_DEPOSIT_BASKET) {
+                deposit.command().poseForLowBasketScoring();
+            }
+        }
+        if (gamepad.buttonCross().isPressed()) { // CROSS : Discard
+            intake.command().drop();
+        }
+
+        if (gamepad.buttonPS().isPressed()) {
+            Global.ASCENDING = true;
+            resetParts();
+            deposit.command().ascendingReady();
+        }
+    }
+
+    public void checkEmergency() {
+        if ((smartGamepad1.buttonLeftBumper().isHeld()
+                && smartGamepad1.buttonRightBumper().isHeld()
+                && smartGamepad1.triggerLeftTrigger().isHeld()
+                && smartGamepad1.triggerRightTrigger().isHeld())
+            || (smartGamepad2.buttonLeftBumper().isHeld()
+                && smartGamepad2.buttonRightBumper().isHeld()
+                && smartGamepad2.triggerLeftTrigger().isHeld()
+                && smartGamepad2.triggerRightTrigger().isHeld())) {
+            if(!Global.IS_EMERGENCY) {
+                smartGamepad1.rumble(0.5);
+                smartGamepad2.rumble(0.5);
+                SmartMotor.emergencyStop();
+                SmartServo.emergencyStop();
+            }
+            Global.IS_EMERGENCY = true;
+        } else {
+            if(Global.IS_EMERGENCY) {
+                SmartServo.normalState();
+                resetParts();
+                smartGamepad1.rumble(0.1);
+                smartGamepad2.rumble(0.1);
+            }
+            Global.IS_EMERGENCY = false;
+        }
+    }
+
+    public void resetParts(){
+        intake.command().compactReady();
+        deposit.command().rest();
+        drive.command().stop();
     }
 }

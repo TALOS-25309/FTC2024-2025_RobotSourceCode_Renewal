@@ -87,7 +87,7 @@ public class Schedule {
     }
 
     public static void addConditionalTask(@NonNull Runnable task, double delay, BooleanSupplier condition) {
-        if (delay <= RUN_INSTANTLY && condition.getAsBoolean()) {
+        if(delay <= RUN_INSTANTLY && condition.getAsBoolean()) {
             task.run();
         } else {
             conditionalTasks.add(new ConditionalTask(task, System.nanoTime() + (long) (delay * 1e9), condition));

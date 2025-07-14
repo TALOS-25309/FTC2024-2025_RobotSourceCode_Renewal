@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.global.Global;
+
 import java.util.Vector;
 
 /**
@@ -107,8 +109,14 @@ public class SmartMotor {
      * This method stops the encoder and resets its position to zero.
      */
     public void resetEncoder() {
-        this.encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if (Global.ENCODER_RESET) {
+            this.encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            this.encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+    }
+
+    public void resetIntegral() {
+        this.pidController.resetIntegral();
     }
 
     /**

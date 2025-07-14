@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
@@ -25,20 +26,21 @@ public class SpecimenAutoTestOpMode extends OpMode {
     private final Deposit deposit = new Deposit();
     private final Drive drive = new Drive();
 
-    private SpecimenStrategy strategy;
+    private SpecimenStrategyV2 strategy;
 
     public enum Strategy {
-        SCORE_SPECIMEN_AND_PICKUP_SAMPLE,
-        DETECT_SAMPLE_AND_PICKUP,
-        GET_SPECIMEN,
+        START_SPECIMEN,
         MOVE_SAMPLES,
+        SCORE_SPECIMEN
     }
 
-    public static Strategy currentStrategy = Strategy.SCORE_SPECIMEN_AND_PICKUP_SAMPLE;
+    public static Strategy currentStrategy = Strategy.START_SPECIMEN;
     public static boolean run = false;
 
     @Override
     public void init() {
+        Global.init(Global.OpMode.AUTO_SPECIMEN, Global.Alliance.RED);
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -52,7 +54,7 @@ public class SpecimenAutoTestOpMode extends OpMode {
             part.init(hardwareMap);
         }
 
-        strategy = new SpecimenStrategy(drive, intake, deposit);
+        strategy = new SpecimenStrategyV2(drive, intake, deposit);
 
         TelemetrySystem.enableClass("Vision");
         TelemetrySystem.enableClass("Drive");
@@ -61,7 +63,9 @@ public class SpecimenAutoTestOpMode extends OpMode {
 
     @Override
     public void start() {
-
+        for (Part part : part_list) {
+            part.start();
+        }
     }
 
     @Override
@@ -79,17 +83,14 @@ public class SpecimenAutoTestOpMode extends OpMode {
 
         if (run) {
             switch (currentStrategy) {
-                case SCORE_SPECIMEN_AND_PICKUP_SAMPLE:
-                    strategy.scoreSpecimenAndPickupSample();
-                    break;
-                case DETECT_SAMPLE_AND_PICKUP:
-                    strategy.detectSampleAndPickUp();
-                    break;
-                case GET_SPECIMEN:
-                    strategy.getSpecimen();
+                case START_SPECIMEN:
+                    strategy.startSpecimen();
                     break;
                 case MOVE_SAMPLES:
-                    strategy.moveThreeSampleToObservationZone();
+                    strategy.moveSamples();
+                    break;
+                case SCORE_SPECIMEN:
+                    strategy.scoreSpecimen();
                     break;
             }
             run = false; // Reset run flag after executing the strategy

@@ -37,6 +37,13 @@ public class Constants {
 
     public static double SAMPLE_MOVE_ROBOT_POSITION_OFFSET = 5;
 
+    public static double POSE_SAMPLE_SIDE_X = 1.5 * TILE_SIZE;
+    public static double POSE_SAMPLE_START_Y = -0.5 * TILE_SIZE;
+    public static double POSE_SAMPLE_END_Y = -2 * TILE_SIZE;
+    public static double POSE_SAMPLE_1_X = 1.9 * TILE_SIZE;
+    public static double POSE_SAMPLE_2_X = 2.3 * TILE_SIZE;
+    public static double POSE_SAMPLE_3_X = 3 * TILE_SIZE - 1.2 * ROBOT_X_OFFSET;
+
     // Delays for various operations
     public static double DELAY_FOR_SAMPLE_DETECTION_CHECK = 1.0;
     public static double DELAY_FOR_LINEAR_SLIDE_MOVEMENT = 0.7;

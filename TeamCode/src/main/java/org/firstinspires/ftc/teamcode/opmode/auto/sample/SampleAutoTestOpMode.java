@@ -10,13 +10,14 @@ import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
 
 @Config(value = "Auto-Sample")
-@Autonomous(group = "Automatic", preselectTeleOp="TeleOpMode")
+@Autonomous(group = "Automatic")
 public class SampleAutoTestOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;
@@ -25,13 +26,14 @@ public class SampleAutoTestOpMode extends OpMode {
     private final Deposit deposit = new Deposit();
     private final Drive drive = new Drive();
 
-    private SampleStrategy strategy;
+    private SampleStrategyV2 strategy;
 
     public enum Strategy {
         SCORE_SAMPLE,
         FIRST_SAMPLE,
         SECOND_SAMPLE,
         THIRD_SAMPLE,
+        OTHER_SAMPLE
     }
 
     public static Strategy currentStrategy = Strategy.SCORE_SAMPLE;
@@ -39,6 +41,8 @@ public class SampleAutoTestOpMode extends OpMode {
 
     @Override
     public void init() {
+        Global.init(Global.OpMode.AUTO_SAMPLE, Global.Alliance.RED);
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -52,7 +56,7 @@ public class SampleAutoTestOpMode extends OpMode {
             part.init(hardwareMap);
         }
 
-        strategy = new SampleStrategy(drive, intake, deposit);
+        strategy = new SampleStrategyV2(drive, intake, deposit);
 
         TelemetrySystem.enableClass("Vision");
         TelemetrySystem.enableClass("Drive");
@@ -61,7 +65,9 @@ public class SampleAutoTestOpMode extends OpMode {
 
     @Override
     public void start() {
-
+        for (Part part : part_list) {
+            part.start();
+        }
     }
 
     @Override
@@ -90,6 +96,9 @@ public class SampleAutoTestOpMode extends OpMode {
                     break;
                 case THIRD_SAMPLE:
                     strategy.thirdSample();
+                    break;
+                case OTHER_SAMPLE:
+                    strategy.otherSample();
                     break;
             }
             run = false; // Reset run flag after executing the strategy

@@ -7,5 +7,6 @@ public enum IntakeState {
     AUTO_DETECTING, // Auto detecting sample
     READY_FOR_PICKUP, // Ready to pick up sample
     PICKED_UP, // Sample is picked up
+    PICKING_UP,
     DROP_SAMPLE, // Drop sample
 }

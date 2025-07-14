@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
@@ -25,6 +26,8 @@ public class AdjustOp extends OpMode {
 
     @Override
     public void init() {
+        Global.init(Global.OpMode.TELE, Global.Alliance.RED);
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();

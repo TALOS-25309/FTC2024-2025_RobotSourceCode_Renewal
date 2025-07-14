@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
@@ -25,12 +26,14 @@ public class SpecimenAutoOpMode extends OpMode {
     private final Deposit deposit = new Deposit();
     private final Drive drive = new Drive();
 
-    private SpecimenStrategy strategy;
+    private SpecimenStrategyV1 strategy;
 
     private boolean alreadyPushedSamples = false;
 
     @Override
     public void init() {
+        Global.init(Global.OpMode.AUTO_SPECIMEN, Global.Alliance.RED);
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -44,7 +47,7 @@ public class SpecimenAutoOpMode extends OpMode {
             part.init(hardwareMap);
         }
 
-        strategy = new SpecimenStrategy(drive, intake, deposit);
+        strategy = new SpecimenStrategyV1(drive, intake, deposit);
 
         SampleMecanumDrive.getVelocityConstraint(
                 Constants.SPECIMEN_VELOCITY,
@@ -82,6 +85,10 @@ public class SpecimenAutoOpMode extends OpMode {
 
     @Override
     public void start() {
+        for (Part part : part_list) {
+            part.start();
+        }
+
         procedure();
     }
 

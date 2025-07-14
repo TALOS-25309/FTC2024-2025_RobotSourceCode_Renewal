@@ -12,12 +12,16 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         this.intake = intake;
     }
 
+    public static boolean PID_ACTIVATED = false;
+    public static boolean SERVO_ACTIVATED = false;
+
     public enum ServoState {
         READY,
         PICKUP,
         TRANSFER,
         CLAW_OPEN,
         CLAW_CLOSE,
+        CLAW_CLOSE_MAXIMUM,
         WRIST_ORIENTATION_LEFT,
         WRIST_ORIENTATION_RIGHT,
         TURRET_LEFT,
@@ -25,18 +29,23 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
         DROP,
         CAUTIOUS_PICKUP_READY
     }
-    public static State ADJUSTMENT_STATE = State.ADJUST_SERVO;
     public static ServoState SERVO_STATE = ServoState.READY;
     public static double MOTOR_TARGET_POSITION_IN_CM = 0.0;
 
     @Override
     protected void setAdjustState() {
-        this.adjustState = ADJUSTMENT_STATE;
+        PIDActivated = PID_ACTIVATED;
+        ServoActivated = SERVO_ACTIVATED;
     }
 
     @Override
     protected void adjustServo() {
-        intake.linearSlideMotor.stop();
+        intake.clawServo.servo().getController().pwmEnable();
+        intake.armUpDownServo.servo().getController().pwmEnable();
+        intake.wristUpDownServo.servo().getController().pwmEnable();
+        intake.wristOrientationServo.servo().getController().pwmEnable();
+        intake.turretServo.servo().getController().pwmEnable();
+
         switch (SERVO_STATE) {
             case READY:
                 intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
@@ -62,6 +71,9 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
                 break;
             case CLAW_CLOSE:
                 intake.clawServo.setPosition(Constants.CLAW_CLOSED_POSITION);
+                break;
+            case CLAW_CLOSE_MAXIMUM:
+                intake.clawServo.setPosition(Constants.CLAW_CLOSED_MAXIMUM_POSITION);
                 break;
             case WRIST_ORIENTATION_LEFT:
                 intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_LEFT_LIMIT);
@@ -108,21 +120,31 @@ public class Adjustment extends org.firstinspires.ftc.teamcode.part.Adjustment {
     }
 
     @Override
+    protected void releaseServo() {
+        intake.clawServo.servo().getController().pwmDisable();
+        intake.armUpDownServo.servo().getController().pwmDisable();
+        intake.wristUpDownServo.servo().getController().pwmDisable();
+        intake.wristOrientationServo.servo().getController().pwmDisable();
+        intake.turretServo.servo().getController().pwmDisable();
+    }
+
+    @Override
+    protected void releasePID() {
+        intake.linearSlideMotor.stop();
+    }
+
+    @Override
     protected void printEncoderValue() {
-        intake.linearSlideMotor.setPower(0);
         TelemetrySystem.addClassData(
                 "IntakeAdjustment",
                 "Linear Slide Encoder Value",
                 intake.linearSlideMotor.getCurrentPosition()
         );
-    }
-
-    @Override
-    protected void printAnalogInputValue() {
         TelemetrySystem.addClassData(
                 "IntakeAdjustment",
-                "Analog Input Value",
+                "Servo Encoder Value",
                 intake.clawAnalogInput.getVoltage()
         );
+
     }
 }

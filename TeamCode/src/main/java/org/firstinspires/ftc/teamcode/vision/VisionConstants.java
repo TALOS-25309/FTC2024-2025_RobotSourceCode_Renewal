@@ -10,7 +10,7 @@ public class VisionConstants {
 
     // Limelight settings
     public static final String LIMELIGHT_NAME = "limelight";
-    public static final double LIMELIGHT_HEIGHT = 16.5 - 1.9; // Height of the limelight in cm
+    public static final double LIMELIGHT_HEIGHT = 16.5 - 3.0; // Height of the limelight in cm
     public static final double LIMELIGHT_ANGLE_IN_DEGREE = 40.0; // Angle of the limelight in degrees
     public static final double LIMELIGHT_ANGLE = Math.toRadians(LIMELIGHT_ANGLE_IN_DEGREE); // DO NOT CHANGE
 

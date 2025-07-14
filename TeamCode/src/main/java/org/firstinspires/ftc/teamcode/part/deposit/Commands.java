@@ -73,7 +73,7 @@ public class Commands {
 
         Schedule.addTask(() -> {
             deposit.armMainServo.setPosition(Constants.ARM_TRANSFER_POSITION());
-        }, Constants.TRANSFER_DELAY_FOR_GOTO_TRANSFER_POSITION);
+        }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
             deposit.command().closeClaw();
@@ -190,7 +190,7 @@ public class Commands {
 
             Schedule.addTask(() -> {
                 deposit.armMainServo.setPosition(Constants.ARM_BASKET_SCORING_POSITION);
-            }, Constants.BASKET_DELAY_FOR_MOVING_ARM);
+            }, Constants.SCORING_BASKET_DELAY_FOR_MOVING_ARM);
 
             Schedule.addTask(() -> {
                 deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_HIGH_BASKET_SCORING_POSITION);
@@ -235,7 +235,7 @@ public class Commands {
 
         Schedule.addTask(() -> {
             deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
+        }, Constants.SCORING_SPECIMEN_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**
@@ -255,7 +255,7 @@ public class Commands {
 
         Schedule.addTask(() -> {
             deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
-        }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
+        }, Constants.SCORING_SPECIMEN_POSE_DELAY_FOR_MOVE_ARM);
     }
 
     /**
@@ -272,7 +272,7 @@ public class Commands {
 
             Schedule.addTask(() -> {
                 deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_FORWARD_POSITION);
-            }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
+            }, Constants.SCORING_SPECIMEN_POSE_DELAY_FOR_MOVE_ARM);
         }, Schedule.RUN_INSTANTLY, () -> deposit.state == DepositState.LOAD_SPECIMEN);
     }
 
@@ -290,7 +290,7 @@ public class Commands {
 
             Schedule.addTask(() -> {
                 deposit.armMainServo.setPosition(Constants.ARM_SPECIMEN_SCORING_BACKWARD_POSITION);
-            }, Constants.SPECIMEN_SCORING_POSE_DELAY_FOR_MOVE_ARM);
+            }, Constants.SCORING_SPECIMEN_POSE_DELAY_FOR_MOVE_ARM);
         }, Schedule.RUN_INSTANTLY, () -> deposit.state == DepositState.LOAD_SPECIMEN);
     }
 

@@ -5,20 +5,17 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
-import org.firstinspires.ftc.teamcode.opmode.auto.specimen.Constants;
-import org.firstinspires.ftc.teamcode.opmode.auto.specimen.SpecimenStrategy;
+import org.firstinspires.ftc.teamcode.global.Global;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
 import org.firstinspires.ftc.teamcode.part.intake.Intake;
 
-@Autonomous(group = "Automatic", preselectTeleOp="TeleOpMode")
+@Autonomous(group = "Automatic", preselectTeleOp="[RED] TeleOpMode")
 public class SampleAutoOpMode extends OpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Part[] part_list;
@@ -27,10 +24,12 @@ public class SampleAutoOpMode extends OpMode {
     private final Deposit deposit = new Deposit();
     private final Drive drive = new Drive();
 
-    private SampleStrategy strategy;
+    private SampleStrategyV2 strategy;
 
     @Override
     public void init() {
+        Global.init(Global.OpMode.AUTO_SAMPLE, Global.Alliance.RED);
+
         SmartMotor.init();
         SmartServo.init();
         Schedule.init();
@@ -44,7 +43,7 @@ public class SampleAutoOpMode extends OpMode {
             part.init(hardwareMap);
         }
 
-        strategy = new SampleStrategy(drive, intake, deposit);
+        strategy = new SampleStrategyV2(drive, intake, deposit);
     }
 
     public void procedure() {
@@ -55,6 +54,12 @@ public class SampleAutoOpMode extends OpMode {
                 strategy.secondSample();
                 Schedule.addConditionalTask(() -> {
                     strategy.thirdSample();
+                    Schedule.addConditionalTask(() -> {
+                        strategy.otherSample();
+                        Schedule.addConditionalTask(() -> {
+                            strategy.otherSample();
+                        }, Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
+                    }, Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
                 }, Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
             }, Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
         }, Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
@@ -62,6 +67,10 @@ public class SampleAutoOpMode extends OpMode {
 
     @Override
     public void start() {
+        for (Part part : part_list) {
+            part.start();
+        }
+
         procedure();
     }
 
