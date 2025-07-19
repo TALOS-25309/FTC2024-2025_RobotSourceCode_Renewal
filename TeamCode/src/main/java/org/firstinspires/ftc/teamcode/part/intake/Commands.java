@@ -8,24 +8,23 @@ import org.firstinspires.ftc.teamcode.vision.Vision;
 
 public class Commands {
     private final Intake intake;
-    private boolean lightState = false;
 
     public Commands(Intake intake) {
         this.intake = intake;
     }
 
     public void lightOn() {
-        if (!lightState) {
+        if (!intake.lightState) {
             intake.light.setPower(1.0);
         }
-        lightState = true;
+        intake.lightState = true;
     }
 
     public void lightOff() {
-        if (lightState) {
+        if (intake.lightState) {
             intake.light.setPower(0.0);
         }
-        lightState = false;
+        intake.lightState = false;
     }
 
     /**
@@ -87,8 +86,12 @@ public class Commands {
      *
      * @param color The color of the sample to detect.
      */
-    private void automaticTarget(Sample.SampleColor color, boolean cautious) {
+    private void automaticTarget(Sample.SampleColor color, boolean cautious, boolean redetection) {
         if (Global.DETECTING) {
+            return;
+        }
+
+        if (intake.wristOrientationManualControl) {
             return;
         }
 
@@ -136,19 +139,32 @@ public class Commands {
                     }, Schedule.RUN_INSTANTLY);
                 }
 
-                double delta = Math.sqrt(Math.pow(finalX - intake.current_x, 2) +
-                        Math.pow(finalY - intake.current_y, 2));
+                if (omega == 999) {
+                    if (redetection) {
+                        Global.DETECTING = false;
+                        intake.command().ready();
+                        return;
+                    }
+                    Schedule.addTask(() -> {
+                        intake.command().movePositiondXdY(finalX, finalY);
+                        intake.command().ready();
+                    }, Schedule.RUN_INSTANTLY);
+                    Schedule.addTask(() -> {
+                        Global.DETECTING = false;
+                        automaticTarget(color, cautious, true);
+                    }, Constants.REDETECTION_DELAY);
+                } else {
+                    Schedule.addTask(() -> {
+                        intake.command().setPositionDelta(
+                                finalX, finalY, finalOmega - intake.current_orientation
+                        );
+                        intake.state = IntakeState.READY_FOR_PICKUP;
+                    }, Schedule.RUN_INSTANTLY);
 
-                Schedule.addTask(() -> {
-                    intake.command().setPositionDelta(
-                            finalX, finalY, finalOmega - intake.current_orientation
-                    );
-                    intake.state = IntakeState.READY_FOR_PICKUP;
-                }, Schedule.RUN_INSTANTLY);
-
-                Schedule.addConditionalTask(() -> {
-                    intake.command().pickup(cautious);
-                }, Constants.MIN_DETECTION_DELAY_FOR_PICKUP, () -> Global.PERMIT_PICKUP);
+                    Schedule.addConditionalTask(() -> {
+                        intake.command().pickup(cautious);
+                    }, Constants.MIN_DETECTION_DELAY_FOR_PICKUP, () -> Global.PERMIT_PICKUP);
+                }
             } else {
                 Global.DETECTING = false;
                 intake.command().ready();
@@ -167,11 +183,11 @@ public class Commands {
     }
     public void automaticTargetForAllianceSample(boolean cautious) {
         if (Global.ALLIANCE == Global.Alliance.RED) {
-            automaticTarget(Sample.SampleColor.RED, cautious);
+            automaticTarget(Sample.SampleColor.RED, cautious, false);
         } else if (Global.ALLIANCE == Global.Alliance.BLUE) {
-            automaticTarget(Sample.SampleColor.BLUE, cautious);
+            automaticTarget(Sample.SampleColor.BLUE, cautious, false);
         } else {
-            automaticTarget(Sample.SampleColor.YELLOW, cautious);
+            automaticTarget(Sample.SampleColor.YELLOW, cautious, false);
         }
     }
 
@@ -185,7 +201,7 @@ public class Commands {
         automaticTargetForYellowSample(false);
     }
     public void automaticTargetForYellowSample(boolean cautious) {
-        automaticTarget(Sample.SampleColor.YELLOW, cautious);
+        automaticTarget(Sample.SampleColor.YELLOW, cautious, false);
     }
 
     /**
@@ -199,6 +215,7 @@ public class Commands {
     }
     public void pickup(boolean cautious) {
         intake.state = IntakeState.PICKING_UP;
+        intake.wristOrientationManualControl = false;
         lightOff();
 
         Schedule.addTask(() -> {
@@ -244,11 +261,11 @@ public class Commands {
         Schedule.addTask(() -> {
             intake.wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
             intake.armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
-            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
             intake.command().openClaw();
         }, Schedule.RUN_INSTANTLY);
 
         Schedule.addTask(() -> {
+            intake.wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
             intake.state = IntakeState.READY_FOR_PICKUP;
             lightOn();
         }, Constants.DISCARD_DELAY_FOR_END);
@@ -310,10 +327,6 @@ public class Commands {
         Schedule.addTask(() -> {
             intake.command().ready();
         }, Constants.TRANSFER_DELAY_FOR_READY);
-
-        Schedule.addTask(() -> {
-            intake.linearSlideMotor.setPower(Constants.LINEAR_SLIDE_STABLE_POWER);
-        }, Schedule.RUN_INSTANTLY);
     }
 
     public void drop() {
@@ -345,11 +358,6 @@ public class Commands {
     }
 
     public void setPosition(double x, double y, double angle) {
-        double orgX, orgY, orgAngle;
-        orgX = x;
-        orgY = y;
-        orgAngle = angle;
-
         while (angle < -90) {
             angle += 180;
         }
@@ -416,7 +424,7 @@ public class Commands {
 
         intake.linearSlideMotor.setPosition(linearPosition);
         intake.turretServo.setPosition(turretPosition);
-        if(intake.state() != IntakeState.READY_FOR_PICKUP) {
+        if(intake.state() != IntakeState.READY_FOR_PICKUP || intake.wristOrientationManualControl) {
             intake.wristOrientationServo.setPosition(wristPosition);
         }
 

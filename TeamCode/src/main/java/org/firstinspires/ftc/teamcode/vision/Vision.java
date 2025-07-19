@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.features.Schedule;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
 
@@ -42,20 +43,18 @@ public class Vision {
 
     public void update() {
         TelemetrySystem.addClassData("Vision", "state", state.toString());
+
+        LLStatus status = limelight.getStatus();
+
+        TelemetrySystem.addClassData("Vision", "name", status.getName());
+        TelemetrySystem.addClassData("Vision", "cpu", status.getCpu());
+
         if (state == State.REQUESTED) {
-            LLStatus status = limelight.getStatus();
-
-            TelemetrySystem.addClassData("Vision", "name", status.getName());
-            TelemetrySystem.addClassData("Vision", "temp", status.getTemp());
-            TelemetrySystem.addClassData("Vision", "cpu", status.getCpu());
-            TelemetrySystem.addClassData("Vision", "fps", (int) status.getFps());
-
             LLResult result = limelight.getLatestResult();
 
             if (result == null) return;
 
             if (innerState == InnerState.WAITING_FOR_DETECTION) {
-                if (!result.isValid()) return;
                 if (result.getPipelineIndex() == VisionConstants.DETECTION_PIPELINE_ID) {
                     if (result.getTimestamp() != previousTimestamp) {
                         previousTimestamp = result.getTimestamp();
@@ -95,10 +94,15 @@ public class Vision {
                                         sampleCorner.set(j, sampleCorner.get(j) / detectionCnt);
                                     }
                                 }
-                                if(Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
+                                if (Global.TRANSFER_TYPE == Global.TransferType.SPECIMEN) {
                                     sample.angle = 90;
                                     state = State.DETECTED;
                                     innerState = InnerState.COMPLETED;
+                                } else if (Math.abs(sample.x) > VisionConstants.DOUBLE_DETECTION_X_RANGE
+                                        || Math.abs(sample.y) > VisionConstants.DOUBLE_DETECTION_Y_RANGE) {
+                                    innerState = InnerState.COMPLETED;
+                                    state = State.DETECTED;
+                                    sample.angle = 999;
                                 } else {
                                     innerState = InnerState.WAITING_FOR_OBTAINING_ORIENTATION;
                                     setInputForObtainingOrientation();
@@ -138,7 +142,7 @@ public class Vision {
                     && result.getPythonOutput()[0] == VisionConstants.DIFFERENCE_CHECKING_CODE) {
                     innerState = InnerState.COMPLETED;
                     state = State.READY;
-                    TelemetrySystem.addClassData("Vision", "diff", result.getPythonOutput()[1]);
+                    //TelemetrySystem.addClassData("Vision", "diff", result.getPythonOutput()[1]);
                     isDifferent = result.getPythonOutput()[1] > VisionConstants.DIFF_THRESHOLD;
                 }
             }
@@ -231,7 +235,7 @@ public class Vision {
         w += buffer * 2;
         h += buffer * 2;
 
-        //*
+        ///*
         TelemetrySystem.addClassData("Vision", "x", x);
         TelemetrySystem.addClassData("Vision", "y", y);
         TelemetrySystem.addClassData("Vision", "w", w);
@@ -270,11 +274,12 @@ public class Vision {
                 TelemetrySystem.addDebugData("FLAG", flag);
                 sample.state = Sample.State.FAILED;
             }
+            ///*
             TelemetrySystem.addClassData("Vision", "contour_x", pythonOutputs[2]);
             TelemetrySystem.addClassData("Vision", "contour_y", pythonOutputs[3]);
             TelemetrySystem.addClassData("Vision", "contour_w", pythonOutputs[4]);
             TelemetrySystem.addClassData("Vision", "contour_h", pythonOutputs[5]);
-
+            //*/
         }
         return sample;
     }

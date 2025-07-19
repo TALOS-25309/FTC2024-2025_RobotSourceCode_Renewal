@@ -43,12 +43,6 @@ public class Drive implements Part {
     @Override
     public void update() {
         this.sampleMecanumDrive.update();
-
-        // Get Current Pose
-        this.robotPose = this.sampleMecanumDrive.getPoseEstimate();
-        TelemetrySystem.addClassData("Drive","robot x", robotPose.getX());
-        TelemetrySystem.addClassData("Drive","[drive] robot y", robotPose.getY());
-        TelemetrySystem.addClassData("Drive","[drive] robot heading", robotPose.getHeading());
     }
 
     @Override

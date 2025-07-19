@@ -10,4 +10,5 @@ public enum DepositState {
     READY_FOR_PICKUP, // Ready to pick up sample
     READY_FOR_DISCARD, // Ready to discard the sample or specimen
     ASCENDING, // Ascending to the climbing position
+    READY_FOR_ASCENDING
 }

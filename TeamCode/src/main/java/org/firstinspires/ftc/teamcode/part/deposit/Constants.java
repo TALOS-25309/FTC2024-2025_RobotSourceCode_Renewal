@@ -39,7 +39,7 @@ public class Constants {
 
     public static double ARM_POSITION_DIFFERENCE = 0.0; // Delta position for arm movement
     public static double ARM_READY_POSITION = 0.16;
-    public static double ARM_TRANSFER_POSITION_FOR_SAMPLE = 0.16;
+    public static double ARM_TRANSFER_POSITION_FOR_SAMPLE = 0.15;
     public static double ARM_TRANSFER_POSITION_FOR_SPECIMEN = 0.18;
     public static double ARM_TRANSFER_POSITION() {
         if (Global.TRANSFER_TYPE == Global.TransferType.SAMPLE) {
@@ -64,7 +64,7 @@ public class Constants {
     public static final double LINEAR_SLIDE_LOW_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 0.0; // NOT USE
     public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_FORWARD_POSITION_IN_CM = 29.0;
     public static final double LINEAR_SLIDE_HIGH_SPECIMEN_SCORING_BACKWARD_POSITION_IN_CM = 34;
-    public static final double LINEAR_SLIDE_ASCENDING_READY_POSITION_IN_CM = 60.0;
+    public static final double LINEAR_SLIDE_ASCENDING_READY_POSITION_IN_CM = 62.0;
     public static final double LINEAR_SLIDE_ASCENDING_CLIMBING_POSITION_IN_CM = 53.0;
     public static final double LINEAR_SLIDE_MAX_LENGTH = 114.3 - 43; // Maximum length of the linear slide in cm
 

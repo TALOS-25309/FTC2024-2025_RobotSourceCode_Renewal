@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
+import org.firstinspires.ftc.teamcode.global.Global;
+import org.firstinspires.ftc.teamcode.global.Memory;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.vision.Vision;
 
@@ -30,6 +32,9 @@ public class Intake implements Part {
     AnalogInput clawAnalogInput;
 
     Vision vision;
+
+    boolean lightState = false;
+    boolean wristOrientationManualControl = false;
 
     double current_x = 0.0, current_y = 0.0, current_orientation = 0.0;
 
@@ -69,13 +74,24 @@ public class Intake implements Part {
         light = hardwareMap.get(DcMotor.class, Constants.LED_NAME);
 
         // Set initial positions
-        clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+        if (Memory.END_STATE == Memory.EndState.PRE_TRANSFER_SAMPLE) {
+           clawServo.setPosition(Constants.CLAW_CLOSED_POSITION);
+           wristUpDownServo.setPosition(Constants.WRIST_TRANSFER_POSITION_FOR_SAMPLE);
+           armUpDownServo.setPosition(Constants.ARM_PRE_TRANSFER_POSITION);
+           state = IntakeState.READY_FOR_TRANSFER;
+        } else {
+            clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+            wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
+            armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
+        }
         wristOrientationServo.setPosition(Constants.WRIST_ORIENTATION_TRANSFER_POSITION);
-        wristUpDownServo.setPosition(Constants.WRIST_READY_POSITION);
-        armUpDownServo.setPosition(Constants.ARM_READY_POSITION);
-        turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+        if(Global.OPMODE == Global.OpMode.TELE) {
+            turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
+        } else {
+            turretServo.setPosition(Constants.TURRET_DROP_POSITION * 0.7 + Constants.TURRET_TRANSFER_POSITION * 0.3);
+        }
 
-        // Set motor properties
+            // Set motor properties
         linearSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         linearSlideMotor.setMotorDirection(DcMotor.Direction.REVERSE);
         linearSlideMotor.setEncoderDirection(DcMotor.Direction.FORWARD);
@@ -92,6 +108,7 @@ public class Intake implements Part {
     public void start() {
         command().lightOn();
         linearSlideMotor.setPosition(0);
+        turretServo.setPosition(Constants.TURRET_TRANSFER_POSITION);
     }
 
     @Override
@@ -105,9 +122,9 @@ public class Intake implements Part {
         }
         */
         TelemetrySystem.addClassData("Intake", "state", this.state.toString());
-        TelemetrySystem.addClassData("Intake", "X", this.current_x);
-        TelemetrySystem.addClassData("Intake", "Y", this.current_y);
-        TelemetrySystem.addClassData("Intake", "Ori", this.current_orientation);
+        // TelemetrySystem.addClassData("Intake", "X", this.current_x);
+        // TelemetrySystem.addClassData("Intake", "Y", this.current_y);
+        // TelemetrySystem.addClassData("Intake", "Ori", this.current_orientation);
     }
 
     @Override
@@ -138,5 +155,10 @@ public class Intake implements Part {
     public boolean isLinearSlideStretchPerfectly() {
         return Math.abs(linearSlideMotor.getTargetPosition() - linearSlideMotor.getCurrentPosition())
                 < Constants.LINEAR_SLIDE_READY_POSITION_THRESHOLD;
+    }
+
+    public void activateWristOrientationManualControl() {
+        this.wristOrientationManualControl = true;
+        this.command().lightOff();
     }
 }

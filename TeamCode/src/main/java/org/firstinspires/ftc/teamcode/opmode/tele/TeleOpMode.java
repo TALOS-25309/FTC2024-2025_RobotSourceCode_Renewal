@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
+import org.firstinspires.ftc.teamcode.global.Memory;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.deposit.DepositState;
@@ -67,6 +68,7 @@ public class TeleOpMode extends OpMode {
         for (Part part : part_list) {
             part.start();
         }
+        Memory.startWithEndState(intake, deposit);
     }
 
     @Override
@@ -118,6 +120,7 @@ public class TeleOpMode extends OpMode {
             part.stop();
         }
         Schedule.stop();
+        Memory.saveEndState(intake, deposit);
     }
 
     public void controlGamepad1(SmartGamepad gamepad) {
@@ -148,13 +151,17 @@ public class TeleOpMode extends OpMode {
             );
         }
         if (gamepad.buttonCircle().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Yellow Sample)
+            if (intake.state() == IntakeState.READY_FOR_PICKUP && !Global.DETECTING) { // Auto Pickup (Yellow Sample)
                 intake.command().automaticTargetForYellowSample();
+            } else if (intake.state() == IntakeState.READY_FOR_TRANSFER) {
+                intake.command().drop();
             }
         }
         if (gamepad.buttonSquare().isPressed()) {
-            if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Auto Pickup (Alliance Sample)
+            if (intake.state() == IntakeState.READY_FOR_PICKUP && !Global.DETECTING) { // Auto Pickup (Alliance Sample)
                 intake.command().automaticTargetForAllianceSample();
+            } else if (intake.state() == IntakeState.READY_FOR_TRANSFER) {
+                intake.command().drop();
             }
         }
         if (gamepad.buttonTriangle().isPressed()) { // Integrated Control
@@ -197,9 +204,15 @@ public class TeleOpMode extends OpMode {
             intake.command().compactReady();
         }
         if (intake.state() == IntakeState.READY_FOR_PICKUP) { // Manual Control
-            intake.command().movePositiondXdY(
+            double turn = (gamepad.buttonRightBumper().isHeld() ? 1:0)
+                    - (gamepad.buttonLeftBumper().isHeld() ? 1:0);
+            if (turn != 0) {
+                intake.activateWristOrientationManualControl();
+            }
+            intake.command().setPositionDelta(
                     gamepad.triggerLeftStickX().getValue(),
-                    -gamepad.triggerLeftStickY().getValue()
+                    -gamepad.triggerLeftStickY().getValue(),
+                    turn * 3.0
             );
         }
 
@@ -233,6 +246,12 @@ public class TeleOpMode extends OpMode {
         }
         if (gamepad.buttonCross().isPressed()) { // CROSS : Discard
             intake.command().drop();
+        }
+
+        if (gamepad.triggerRightStickY().getValue() < -0.5) {
+            deposit.command().stretchLinearSlideManually();
+        } else if (gamepad.triggerRightStickY().getValue() > 0.5) {
+            deposit.command().retractLinearSlideManually();
         }
 
         if (gamepad.buttonPS().isPressed()) {

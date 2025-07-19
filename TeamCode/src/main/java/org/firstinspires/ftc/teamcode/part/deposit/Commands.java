@@ -315,6 +315,7 @@ public class Commands {
     }
 
     public void ascendingReady() {
+        deposit.state = DepositState.READY_FOR_ASCENDING;
         Schedule.addTask(() -> {
             deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_ASCENDING_READY_POSITION);
         }, Schedule.RUN_INSTANTLY);
@@ -325,5 +326,18 @@ public class Commands {
         Schedule.addTask(() -> {
             deposit.linearSlideMainMotor.setPosition(Constants.LINEAR_SLIDE_ASCENDING_CLIMBING_POSITION);
         }, Schedule.RUN_INSTANTLY);
+    }
+
+    public void stretchLinearSlideManually() {
+        double val = deposit.linearSlideMainMotor.getTargetPosition() + 100;
+        if(val > Constants.LINEAR_SLIDE_RANGE)
+            val = Constants.LINEAR_SLIDE_RANGE;
+        deposit.linearSlideMainMotor.setPosition(val);
+    }
+
+    public void retractLinearSlideManually() {
+        double val = deposit.linearSlideMainMotor.getTargetPosition() - 100;
+        if(val < 0) val = 0;
+        deposit.linearSlideMainMotor.setPosition(val);
     }
 }

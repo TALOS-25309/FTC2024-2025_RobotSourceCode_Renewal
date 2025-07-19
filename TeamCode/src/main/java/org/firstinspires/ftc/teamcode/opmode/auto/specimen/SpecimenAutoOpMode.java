@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
+import org.firstinspires.ftc.teamcode.global.Memory;
 import org.firstinspires.ftc.teamcode.part.Part;
 import org.firstinspires.ftc.teamcode.part.deposit.Deposit;
 import org.firstinspires.ftc.teamcode.part.drive.Drive;
@@ -50,33 +51,6 @@ public class SpecimenAutoOpMode extends OpMode {
 
     public void procedure() {
         strategy.startSpecimen();
-        Schedule.addConditionalTask(() -> {
-            strategy.moveFirstSample();
-            Schedule.addConditionalTask(() -> {
-                strategy.moveSecondSample();
-                Schedule.addConditionalTask(() -> {
-                    strategy.moveThirdSample();
-                    Schedule.addConditionalTask(() -> {
-                        strategy.pickupSpecimenAfterMoveSample();
-                        Schedule.addConditionalTask(() -> {
-                            strategy.scoreSpecimen();
-                            Schedule.addConditionalTask(() -> {
-                                strategy.pickupSpecimen();
-                                Schedule.addConditionalTask(() -> {
-                                    strategy.scoreSpecimen();
-                                    Schedule.addConditionalTask(() -> {
-                                        strategy.pickupSpecimen();
-                                        Schedule.addConditionalTask(() -> {
-                                            strategy.scoreSpecimen();
-                                        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                                    },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                                },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                            },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                    },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-                },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-            },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
-        },Schedule.RUN_INSTANTLY, () -> strategy.isEnd());
     }
 
     @Override
@@ -100,6 +74,7 @@ public class SpecimenAutoOpMode extends OpMode {
 
         // Update telemetry
         TelemetrySystem.update();
-    }
 
+        Memory.saveEndState(intake, deposit);
+    }
 }

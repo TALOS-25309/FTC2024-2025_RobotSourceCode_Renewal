@@ -15,6 +15,7 @@ public class Global {
     public enum TransferType {SAMPLE, SPECIMEN}
     public static TransferType TRANSFER_TYPE = TransferType.SAMPLE;
     public static boolean ENCODER_RESET = true;
+    public static boolean MANUAL_OPERATION = false;
 
     private static OpMode PREVIOUS_OPMODE = OpMode.TELE;
 
@@ -25,6 +26,7 @@ public class Global {
         DETECTING = false;
         ASCENDING = false;
         PERMIT_PICKUP = true;
+        MANUAL_OPERATION = false;
 
         ENCODER_RESET = true;
         if (OPMODE == OpMode.TELE) {

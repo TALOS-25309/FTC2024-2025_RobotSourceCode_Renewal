@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.features.SmartMotor;
 import org.firstinspires.ftc.teamcode.features.SmartServo;
 import org.firstinspires.ftc.teamcode.features.TelemetrySystem;
 import org.firstinspires.ftc.teamcode.global.Global;
+import org.firstinspires.ftc.teamcode.global.Memory;
 import org.firstinspires.ftc.teamcode.part.Part;
 
 public class Deposit implements Part {
@@ -70,7 +71,15 @@ public class Deposit implements Part {
         } else if (Global.OPMODE == Global.OpMode.AUTO_SAMPLE) {
             clawServo.setPosition(Constants.CLAW_CLOSED_POSITION_FOR_SAMPLE);
         } else {
-            clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+            if (Memory.END_STATE == Memory.EndState.TRANSFER_SPECIMEN) {
+                clawServo.setPosition(Constants.CLAW_CLOSED_POSITION_FOR_SPECIMEN);
+                state = DepositState.LOAD_SPECIMEN;
+            } else if (Memory.END_STATE == Memory.EndState.TRANSFER_SAMPLE) {
+                clawServo.setPosition(Constants.CLAW_CLOSED_POSITION_FOR_SAMPLE);
+                state = DepositState.LOAD_SAMPLE;
+            } else {
+                clawServo.setPosition(Constants.CLAW_OPEN_POSITION);
+            }
         }
 
         armMainServo.setDirection(Servo.Direction.FORWARD);

@@ -13,19 +13,19 @@ public class Constants {
     public static double POSE_INITIAL_X = -2 * TILE_SIZE + ROBOT_X_OFFSET + UNIT_CM;
     public static double POSE_INITIAL_Y = -3 * TILE_SIZE + ROBOT_Y_OFFSET;
 
-    public static double POSE_SAMPLE_DEPOSIT_X = -2.4 * TILE_SIZE;
-    public static double POSE_SAMPLE_DEPOSIT_Y = -2.4 * TILE_SIZE;
+    public static double POSE_SAMPLE_DEPOSIT_X = -2.4 * TILE_SIZE + UNIT_CM * 5;
+    public static double POSE_SAMPLE_DEPOSIT_Y = -2.4 * TILE_SIZE - UNIT_CM * 5;
     public static double POSE_SAMPLE_DEPOSIT_ORIENTATION = 45;
 
     public static final double BASKET_ROBOT_DISTANCE = 20.36467;
 
-    public static double POSE_SAMPLE_PICKUP_DIRECTION_1 = 70.26984;
+    public static double POSE_SAMPLE_PICKUP_DIRECTION_1 = 66.17626;
     public static double POSE_SAMPLE_PICKUP_DIRECTION_2 = 81.41295;
     public static double POSE_SAMPLE_PICKUP_DIRECTION_3 = 130.44356;
     public static double POSE_SAMPLE_PICKUP_DIRECTION_o = 20;
 
-    public static double POSE_SAMPLE_PICKUP_X_1 = -60.14386;
-    public static double POSE_SAMPLE_PICKUP_Y_1 = -54.97208;
+    public static double POSE_SAMPLE_PICKUP_X_1 = -59.45501;
+    public static double POSE_SAMPLE_PICKUP_Y_1 = -53.25583;
 
     public static double POSE_SAMPLE_PICKUP_X_2 = -62.60025;
     public static double POSE_SAMPLE_PICKUP_Y_2 = -53.82515;
@@ -36,9 +36,9 @@ public class Constants {
     public static double POSE_SAMPLE_PICKUP_X_o = -26.5;
     public static double POSE_SAMPLE_PICKUP_Y_o = -5;
 
-    public static double LINEAR_SAMPLE_PICKUP_X_1 = 0;
+    public static double LINEAR_SAMPLE_PICKUP_X_1 = -1.9;
     public static double LINEAR_SAMPLE_PICKUP_Y_1 = 53;
-    public static double LINEAR_SAMPLE_PICKUP_X_2 = -5;
+    public static double LINEAR_SAMPLE_PICKUP_X_2 = -4;
     public static double LINEAR_SAMPLE_PICKUP_Y_2 = 45;
     public static double LINEAR_SAMPLE_PICKUP_X_3 = -0.5;
     public static double LINEAR_SAMPLE_PICKUP_Y_3 = 32;

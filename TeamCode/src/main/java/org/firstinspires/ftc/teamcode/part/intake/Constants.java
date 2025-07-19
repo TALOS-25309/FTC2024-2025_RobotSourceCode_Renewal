@@ -24,7 +24,7 @@ class Constants {
     public static final String LED_NAME = "LED";
 
     // Intake system measurements (in cm, degree)
-    public static final double LINEAR_SLIDE_MAX_LENGTH = 52.8; // Maximum length of the linear slide in cm
+    public static final double LINEAR_SLIDE_MAX_LENGTH = 41; // Maximum length of the linear slide in cm
     public static double ARM_LENGTH = 12.39; // Length of the arm in cm
     public static double CLAW_DISTANCE = 0.69; // Distance offset of the claw in cm
     public static double ANGLE_OFFSET = 5.2; // Angle offset in degrees for the turret
@@ -37,7 +37,7 @@ class Constants {
     public static double LINEAR_SLIDE_PID_P = 0.0002;
     public static double LINEAR_SLIDE_PID_I = 0.001;
     public static double LINEAR_SLIDE_PID_D = 0.000;
-    public static double LINEAR_SLIDE_RANGE = 42906; // Range of the linear slide in encoder ticks
+    public static double LINEAR_SLIDE_RANGE = 33303; // Range of the linear slide in encoder ticks
     // Power to stabilize the linear slide when it is inside the robot
     public static double LINEAR_SLIDE_STABLE_POWER = -0.1;
 
@@ -50,12 +50,12 @@ class Constants {
     public static double WRIST_ORIENTATION_RIGHT_LIMIT = 0.855;
     public static double WRIST_ORIENTATION_TRANSFER_POSITION = 0.52;
 
-    public static double WRIST_READY_POSITION = 0.53;
-    public static double WRIST_PICKUP_POSITION_FOR_SAMPLE = 0.16;
+    public static double WRIST_READY_POSITION = 0.53 + 0.09;
+    public static double WRIST_PICKUP_POSITION_FOR_SAMPLE = 0.24;
     public static double WRIST_PICKUP_POSITION_FOR_SPECIMEN = 0.26;
-    public static double WRIST_TRANSFER_POSITION_FOR_SAMPLE = 0.85;
+    public static double WRIST_TRANSFER_POSITION_FOR_SAMPLE = 0.91;
     public static double WRIST_TRANSFER_POSITION_FOR_SPECIMEN = 0.74;
-    public static double WRIST_DROP_POSITION = 0.53;
+    public static double WRIST_DROP_POSITION = 0.53 + 0.09;
     public static double WRIST_PICKUP_POSITION() {
         if(Global.TRANSFER_TYPE == Global.TransferType.SAMPLE) {
             return WRIST_PICKUP_POSITION_FOR_SAMPLE;
@@ -71,13 +71,13 @@ class Constants {
         }
     }
 
-    public static double ARM_READY_POSITION = 0.71;
-    public static double ARM_PRE_TRANSFER_POSITION = 0.78;
-    public static double ARM_PICKUP_POSITION_FOR_SAMPLE = 0.91;
-    public static double ARM_PICKUP_POSITION_FOR_SPECIMEN = 0.88;
-    public static double ARM_TRANSFER_POSITION_FOR_SAMPLE = 0.38;
-    public static double ARM_TRANSFER_POSITION_FOR_SPECIMEN = 0.35;
-    public static double ARM_CAUTIOUS_PICKUP_READY_POSITION = 0.81;
+    public static double ARM_READY_POSITION = 0.78;
+    public static double ARM_PRE_TRANSFER_POSITION = 0.88;
+    public static double ARM_PICKUP_POSITION_FOR_SAMPLE = 0.97;
+    public static double ARM_PICKUP_POSITION_FOR_SPECIMEN = 0.93;
+    public static double ARM_TRANSFER_POSITION_FOR_SAMPLE = 0.46;
+    public static double ARM_TRANSFER_POSITION_FOR_SPECIMEN = 0.42;
+    public static double ARM_CAUTIOUS_PICKUP_READY_POSITION = 0.88;
     public static double ARM_PICKUP_POSITION() {
         if(Global.TRANSFER_TYPE == Global.TransferType.SAMPLE) {
             return ARM_PICKUP_POSITION_FOR_SAMPLE;
@@ -114,6 +114,7 @@ class Constants {
     public static double TRANSFER_DELAY_FOR_READY = 0.8;
 
     public static double DETECTION_DELAY = 0.1;
+    public static double REDETECTION_DELAY = 0.3;
 
     public static double DROP_DELAY_FOR_MOVE_RIGHT = 0.1;
     public static double DROP_DELAY_FOR_OPEN_CLAW = 0.5;
@@ -123,5 +124,5 @@ class Constants {
     public static double DISCARD_DELAY_FOR_END = 1.0;
 
     // Others
-    public static double LINEAR_SLIDE_READY_POSITION_THRESHOLD = 100;
+    public static double LINEAR_SLIDE_READY_POSITION_THRESHOLD = 200;
 }

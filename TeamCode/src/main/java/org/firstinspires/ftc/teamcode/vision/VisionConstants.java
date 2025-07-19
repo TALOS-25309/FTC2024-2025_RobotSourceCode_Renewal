@@ -32,4 +32,7 @@ public class VisionConstants {
     public static int REPETITION = 3;
 
     public static int DIFF_THRESHOLD = 200;
+
+    public static double DOUBLE_DETECTION_X_RANGE = 4;
+    public static double DOUBLE_DETECTION_Y_RANGE = 8;
 }
